@@ -1,0 +1,6 @@
+- name: Deploy moode
+  hosts: moode
+  remote_user: pi
+
+  roles:
+    - moode

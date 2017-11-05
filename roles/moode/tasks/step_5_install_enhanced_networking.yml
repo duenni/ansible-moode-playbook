@@ -1,0 +1,91 @@
+- name: Step 5 - install Host AP mode
+  become: true
+  apt: name={{item}} state=present
+  with_items:
+    - dnsmasq
+    - hostapd
+
+- name: Step 5 - systemd disable hostapd & dnsmasq
+  become: true
+  systemd:
+    name: "{{ item }}"
+    state: stopped
+    enabled: no
+    daemon-reload: yes
+  with_items:
+    - hostapd
+    - dnsmasq
+
+- name: Step 5 - install Bluetooth packages
+  become: true
+  apt: name={{ item }} state=present
+  with_items:
+    - bluez
+    - bluez-firmware
+    - pi-bluetooth
+    - dh-autoreconf
+    - expect
+    - libortp-dev
+    - libbluetooth-dev
+    - libasound2-dev
+    - libusb-dev
+    - libglib2.0-dev
+    - libudev-dev
+    - libical-dev
+    - libreadline-dev
+    - libsbc1
+    - libsbc-dev
+
+- name: Step 5 - git checkout bluez-alsa
+  become: true
+  git:
+    repo: git://github.com/Arkq/bluez-alsa.git
+    dest: /tmp/bluez-alsa
+
+- name: Step 5 - autoreconf bluez-alsa
+  become: true
+  shell: chdir=/tmp/bluez-alsa autoreconf --install creates=/tmp/bluez-alsa/compile
+
+- name: Step 5 - mkdir build for bluez-alsa
+  become: true
+  file: 
+    path: /tmp/bluez-alsa/build 
+    state: directory
+
+- name: Step 5 - bluez-alsa configure && make && make install
+  become: true
+  command: "{{ item }}"
+  args:
+    chdir: /tmp/bluez-alsa/build #NOT - chdir:
+    creates: /usr/bin/bluealsa
+  with_items:
+    - ../configure --disable-hcitop --with-alsaplugindir=/usr/lib/arm-linux-gnueabihf/alsa-lib
+    - make
+    - make install
+
+- name: Step 5 - delete bluez-alsa build dirs
+  become: true
+  file: 
+    state: absent
+    path: /tmp/bluez-alsa
+
+- name: Step 5 - disable bluetooth, bluealsa and hcuistart 
+  become: true
+  systemd:
+    name: "{{ item }}"
+    state: stopped
+    enabled: no
+    daemon_reload: yes
+  with_items:
+    - 'bluetooth.service'
+    #- 'bluealsa.service'
+    - 'hciuart.service'
+
+- name: Step 5 - mkdir var/run/bluealsa
+  become: true
+  file: 
+    path: /var/run/bluealsa
+    state: directory
+    recurse: yes #works like mkdir -p
+
+#Add REBOOT here

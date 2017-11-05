@@ -1,0 +1,52 @@
+- name: Step 6 - copy WiringPi archive
+  copy:
+    src: /home/pi/rel-stretch/other/wiringpi/wiringPi-2.44-96344ff.tar.gz
+    dest: /home/pi/wiringPi-2.44-96344ff.tar.gz
+    remote_src: yes
+
+- name: Step 6 - untar WiringPi archive
+  unarchive:
+    src: /home/pi/wiringPi-2.44-96344ff.tar.gz
+    dest: /home/pi
+    remote_src: yes
+
+- name: Step 6 - build WiringPi
+  become: true
+  command: "{{ item }}"
+  args:
+    chdir: /home/pi/wiringPi-96344ff
+    creates: /usr/local/bin/gpio
+  with_items:
+    - ./build
+
+- name: Step 6 - delete WiringPi build dirs
+  file: 
+    state: absent
+    path: /home/pi/wiringPi-96344ff
+
+- name: Step 6 - delete WiringPi archive
+  file: 
+    state: absent
+    path: /home/pi/wiringPi-2.44-96344ff.tar.gz
+
+- name: Step 6 - copy Rotenc.c
+  copy:
+    src: /home/pi/rel-stretch/other/rotenc/rotenc.c
+    dest: /home/pi/rotenc.c
+    remote_src: yes
+
+- name: Step 6 - make Rotenc
+  become: true
+  shell: chdir=/home/pi gcc -std=c99 rotenc.c -orotenc -lwiringPi
+
+- name: Step 6 - copy Rotenc 
+  become: true
+  copy:
+    src: /home/pi/rotenc
+    dest: /usr/local/bin
+    remote_src: yes
+
+- name: Step 6 - delete WiringPi build dirs
+  file: 
+    state: absent
+    path: /home/pi/rotenc

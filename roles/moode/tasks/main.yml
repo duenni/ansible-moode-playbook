@@ -1,0 +1,4 @@
+- include_tasks: step_3_prerequisites.yml
+- include_tasks: step_4_install_core_packages.yml
+- include_tasks: step_5_install_enhanced_networking.yml
+- include_tasks: step_6_install_rotary_encoder_driver.yml
