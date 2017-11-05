@@ -1,5 +1,5 @@
-Work in Progress!
-Not functional in current state!
+**Work in Progress!
+Not functional in current state!**
 
 This Playbook reflects Tim Curtis' build_recipe for [moodeaudio](http://moodeaudio.org/). So a build of moode won't has to be done manually anymore.
 
