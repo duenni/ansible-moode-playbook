@@ -12,7 +12,7 @@
 - name: Step 4 - enable rpcbind
   become: true
   systemd:
-    name: shellinabox
+    name: rpcbind
     state: started
     enabled: yes
 

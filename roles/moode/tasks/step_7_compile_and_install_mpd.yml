@@ -1,0 +1,103 @@
+- name: Step 7 - create mpd user
+  become: true
+  user:
+    name: mpd
+
+- name: Step 7 - mkdirs
+  become: true
+  file: 
+    path: "{{ item }}"
+    owner: mpd
+    group: audio
+    state: directory
+  with_items:
+    - /var/lib/mpd
+    - /var/lib/mpd/music
+    - /var/lib/mpd/playlists
+    - /var/lib/mpd/state
+    - /var/log/mpd
+
+- name: Step 7 - touch mpd log file
+  become: true
+  copy: 
+    dest: "{{ item }}"
+    content: ""
+    owner: mpd
+    group: audio
+    mode: 0644
+  with_items:
+    - /var/log/mpd/mpd.log
+
+- name: Step 7 - copy mpd.conf
+  become: true
+  copy:
+    owner: mpd
+    group: audio
+    mode: 0666
+    src: /home/pi/rel-stretch/mpd/mpd.conf.default
+    dest: /etc/mpd.conf
+    remote_src: yes
+
+- name: Step 7 - install MPD dev libs
+  become: true
+  apt: name={{ item }} state=present
+  with_items:
+    - libmad0-dev
+    - libmpg123-dev
+    - libid3tag0-dev
+    - libflac-dev
+    - libvorbis-dev
+    - libfaad-dev
+    - libwavpack-dev
+    - libavcodec-dev
+    - libavformat-dev
+    - libmp3lame-dev
+    - libsoxr-dev
+    - libcdio-paranoia-dev
+    - libiso9660-dev
+    - libcurl4-gnutls-dev
+    - libasound2-dev
+    - libshout3-dev
+    - libyajl-dev
+    - libmpdclient-dev
+    - libavahi-client-dev
+    - libsystemd-dev
+    - libwrap0-dev
+    - libboost-dev
+    - libicu-dev
+    - libglib2.0-dev
+
+- name: Step 7 - download MPD 0.20.10 sources
+  get_url:
+    url: http://www.musicpd.org/download/mpd/0.20/mpd-0.20.10.tar.xz
+    dest: /home/pi
+
+- name: Step 7 - untar MPD sources archive
+  unarchive:
+    src: /home/pi/mpd-0.20.10.tar.xz
+    dest: /home/pi
+    remote_src: yes
+
+- name: Step 7 - run autogen.sh
+  become: true
+  shell: chdir=/home/pi/mpd-0.20.10 sh autogen.sh
+
+- name: Step 7 - MPD configure && make && make install
+  become: true
+  command: "{{ item }}"
+  args:
+    chdir: /home/pi/mpd-0.20.10
+    creates: /usr/local/bin/mpd
+  with_items:
+    - ./configure --enable-database --enable-libmpdclient --enable-alsa --enable-curl --enable-dsd --enable-ffmpeg --enable-flac --enable-id3 --enable-soundcloud --enable-lame-encoder --enable-mad --enable-mpg123 --enable-pipe-output --enable-recorder-output --enable-shout --enable-vorbis --enable-wave-encoder --enable-wavpack --enable-httpd-output --enable-soxr --with-zeroconf=avahi --disable-bzip2 --disable-zzip --disable-fluidsynth --disable-gme --disable-wildmidi --disable-sqlite --disable-jack --disable-ao --disable-oss --disable-ipv6 --disable-pulse --disable-nfs --disable-smbclient --disable-upnp --disable-expat --disable-lsr --disable-sndfile --disable-audiofile --disable-sidplay
+    - make
+    - make install
+    - strip --strip-unneeded /usr/local/bin/mpd
+
+- name: Step 7 - apt clean & autoremoce
+  become: true
+  apt:
+    autoclean: yes
+    autoremove: yes
+
+#Add REBOOT here
