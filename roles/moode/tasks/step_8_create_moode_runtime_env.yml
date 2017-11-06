@@ -1,17 +1,20 @@
-- name: Step 8 - make sure we have a 'wheel' group
+- name: Step 8 - make sure we have a sudo group
+  become: true
   group:
     name: wheel
     state: present
 
-- name: Step 8 - allow 'wheel' group to have passwordless sudo
+- name: Step 8 - allow sudo group to have passwordless sudo
+  become: true
   lineinfile:
-    dest: /etc/sudoers
+    path: /etc/sudoers
     state: present
     regexp: '^%wheel'
     line: '%wheel ALL=(ALL) NOPASSWD: ALL'
     validate: visudo -cf %s
 
-- name: Step 8 - add sudoers users to wheel group
+- name: Step 8 - add sudoers users to sudo group
+  become: true
   user:
     name: "{{ item }}"
     groups: wheel
@@ -19,3 +22,84 @@
   with_items:
     - pi
     - www-data
+
+- name: Step 8 - mkdirs
+  become: true
+  file: 
+    path: "{{ item }}"
+    state: directory
+  with_items:
+    - /var/local/www
+    - /var/local/www/commandw
+    - /var/local/www/cssw
+    - /var/local/www/jsw
+    - /var/local/www/imagesw
+    - /var/local/www/imagesw/toggle
+    - /var/local/www/templatesw
+    - /mnt/NAS
+    - /mnt/SDCARD
+    - /mnt/UPNP
+
+- name: Step 8 - mkdirs && chmod
+  become: true
+  file: 
+    path: "{{ item }}"
+    mode: 0777
+    state: directory
+  with_items:
+    - /var/lib/mpd/music/RADIO
+    - /var/local/www/db
+
+- name: Step 8 - touch files
+  become: true
+  copy: 
+    dest: "{{ item }}"
+    content: ""
+    mode: 0666
+  with_items:
+    - /var/log/moode.log
+    - /var/log/php_errors.log
+
+- name: Step 8 - symlinks
+  become: true
+  file: 
+    src: "{{ item.path }}"
+    dest: "{{ item.dest }}"
+    state: link
+  with_items:
+    - { path: '/mnt/NAS', dest: '/var/lib/mpd/music/NAS' }
+    - { path: '/mnt/SDCARD', dest: '/var/lib/mpd/music/SDCARD' }
+    - { path: '/media', dest: '/var/lib/mpd/music/USB' }
+    - { path: '/var/lib/mpd/music', dest: '/var/www/mpdmusic' }
+
+- name: Step 8 - copy files
+  become: true
+  copy:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    remote_src: yes
+  with_items:
+    - { src: '/home/pi/rel-stretch/mpd/sticker.sql', dest: '/var/lib/mpd' }
+    - { src: '/home/pi/rel-stretch/network/interfaces.default', dest: '/etc/network/interfaces' }
+    - { src: '/home/pi/rel-stretch/network/wpa_supplicant.conf.default', dest: '/etc/wpa_supplicant/wpa_supplicant.conf' }
+    - { src: '/home/pi/rel-stretch/network/dhcpcd.conf.default', dest: '/etc/dhcpcd.conf' }
+    - { src: '/home/pi/rel-stretch/network/hostapd.conf.default', dest: '/etc/hostapd/hostapd.conf' }
+    - { src: '/home/pi/rel-stretch/var/local/www/db/moode-sqlite3.db.default', dest: '/var/local/www/db/moode-sqlite3.db' }
+
+- name: Step 8 - copy files recursively #remote_src: yes does not support recursive dir copy
+  become: true
+  command: "cp -r {{ item.src }} {{ item.dest }}"
+  with_items:
+    - { src: "'/home/pi/rel-stretch/other/sdcard/Stereo Test/'", dest: '/var/lib/mpd/music/SDCARD' } #double quotes because there is a space in dir path
+
+- name: Step 8 - delete dir
+  become: true
+  file: 
+    state: absent
+    path: /var/www/html
+
+- name: Step 8 - delete file
+  become: true
+  file: 
+    state: absent
+    path: /etc/update-motd.d/10-uname

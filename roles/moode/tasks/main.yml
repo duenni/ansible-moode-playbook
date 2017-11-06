@@ -3,4 +3,4 @@
 - include_tasks: step_5_install_enhanced_networking.yml
 - include_tasks: step_6_install_rotary_encoder_driver.yml
 - include_tasks: step_7_compile_and_install_mpd.yml
-#- include_tasks: step_8_create_moode_runtime_env.yml
+- include_tasks: step_8_create_moode_runtime_env.yml
