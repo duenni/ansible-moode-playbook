@@ -1,0 +1,33 @@
+- name: Step 9 - delete dirs
+  become: true
+  file: 
+    state: absent
+    path: "{{ item }}"
+  with_items:
+    - /var/lib/mpd/music/RADIO
+    - /var/www/images/radio-logos
+
+- name: Step 9 - copy dir contents
+  become: true
+  command: cp -r "{{ item.src }}" "{{ item.dest }}"
+  with_items:
+    - { src: '/home/pi/rel-stretch/mpd/RADIO', dest: '/var/lib/mpd/music/' }
+    - { src: '/home/pi/rel-stretch/mpd/playlists', dest: '/var/lib/mpd/' }
+    - { src: '/home/pi/rel-stretch/etc', dest: '/' }
+    - { src: '/home/pi/rel-stretch/lib', dest: '/' }
+    - { src: '/home/pi/rel-stretch/usr', dest: '/' }
+    - { src: '/home/pi/rel-stretch/var', dest: '/' }
+    - { src: '/home/pi/rel-stretch/www', dest: '/var/' }
+
+- name: Step 9 - copy dir contents in home
+  copy:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    remote_src: yes
+  with_items:
+    - { src: '/home/pi/rel-stretch/home/.dircolors', dest: '/home/pi/.dircolors' }
+    - { src: '/home/pi/rel-stretch/home/fpmpool.sh', dest: '/home/pi/.fpmpool.sh' }
+    - { src: '/home/pi/rel-stretch/home/mlog.sh', dest: '/home/pi/mlog.sh' }
+    - { src: '/home/pi/rel-stretch/home/piano.sh', dest: '/home/pi/piano.sh' }
+    - { src: '/home/pi/rel-stretch/home/srestart.sh', dest: '/home/pi/srestart.sh' }
+    - { src: '/home/pi/rel-stretch/home/tlog.sh', dest: '/home/pi/tlog.sh' }
