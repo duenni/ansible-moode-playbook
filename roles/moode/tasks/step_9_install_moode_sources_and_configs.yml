@@ -31,3 +31,85 @@
     - { src: '/home/pi/rel-stretch/home/piano.sh', dest: '/home/pi/piano.sh' }
     - { src: '/home/pi/rel-stretch/home/srestart.sh', dest: '/home/pi/srestart.sh' }
     - { src: '/home/pi/rel-stretch/home/tlog.sh', dest: '/home/pi/tlog.sh' }
+
+- name: Step 9 - chmod dir
+  become: true
+  file: 
+    path: /var/www/command/
+    mode: 0755
+
+- name: Step 9 - execute util.sh
+  become: true
+  command: /var/www/command/util.sh "emerald" "2ecc71" "27ae60"
+
+- name: Step 9 - execute sqlite3
+  become: true
+  command: sqlite3 /var/local/www/db/moode-sqlite3.db "update cfg_system set value='Emerald' where param='themecolor'"
+
+- name: Step 9 - chmod 0755
+  become: true
+  file: 
+    state: absent
+    path: "{{ item }}"
+    mode: 0755
+  with_items:
+    - /etc/init.d/mpd
+    - /usr/local/bin/a2dp-autoconnect
+
+- name: Step 9 - chmod 0666
+  become: true
+  file: 
+    state: absent
+    path: "{{ item }}"
+    mode: 0666
+  with_items:
+    - /etc/bluealsaaplay.conf
+
+- name: Step 9 - chmod 0644
+  become: true
+  file: 
+    state: absent
+    path: "{{ item }}"
+    mode: 0644
+  with_items:
+    - /lib/systemd/system/mpd.service
+    - /lib/systemd/system/mpd.socket
+    - /etc/systemd/system/bluealsa-aplay@.service
+    - /etc/systemd/system/bluealsa.service
+    - /lib/systemd/system/bluetooth.service
+    - /lib/systemd/system/rotenc.service
+    - /etc/udev/rules.d
+    - /lib/systemd/system/squeezelite-armv6l.service
+    - /lib/systemd/system/squeezelite-armv7l.service
+    - /lib/systemd/system/upmpdcli.service
+
+- name: Step 9 - chmod 0777
+  become: true
+  file: 
+    state: absent
+    path: "{{ item }}"
+    mode: 0777
+  with_items:
+    - /var/local/www/playhistory.log
+    - /var/local/www/currentsong.txt
+
+- name: Step 9 - touch libcache.json
+  become: true
+  copy: 
+    dest: /var/local/www/libcache.json
+    content: ""
+    mode: 0777
+
+#- name: Step 9 - disable services
+#  become: true
+#  systemd:
+#    name: "{{ item }}"
+#    state: stopped
+#    enabled: no
+#    daemon_reload: yes
+#  with_items:
+#    - squeezelite-armv6l
+#    - squeezelite-armv7l
+#    - upmpdcli.service
+
+#REBOOT here
