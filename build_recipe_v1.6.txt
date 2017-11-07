@@ -1,21 +1,30 @@
 ########################################################
 #
-# Build Recipe v1.1, 2017-11-03
+# Build Recipe v1.6, 2017-11-07
 #
 # These instructions are written for Linux Enthusiasts
 # and System Integrators and provide a recipe for making
 # a custom OS for running moOde audio player.
+#
+# NOTE: This recipe is based on Stretch Lite 2017-09-07
 # 
 # Unless otherwise noted or if a command requires user
 # interaction, groups of commands can be run in batch.
 #
-# moOde 4.0 Beta 7
+# moOde 4 Beta 8
 #
 # Changes:
 #
-# Use echo "pi:moodeaudio" | sudo chpasswd in STEP 3
-#
-#
+# v1.6: Add additional dev libs for upmpdcli (gmusicapi)
+#       Fix typo in STEP 3, r40b7 -> r40b8
+# v1.5: Fix typo on line 45
+# v1.4: Remove odd binary chars at end of line 53
+# v1.3: Added optional WiFi config in STEP 2
+# v1.2: Simplified method for STEPS 1,2
+#       Bump to MPD 0.20.11
+# v1.1: Use echo "pi:moodeaudio" | sudo chpasswd in STEP 3
+#       Set 0755 permissions on /var/local/www in STEP 8
+#       Remove templatesw# fatfinger dir in STEP 8
 #
 # (C) Tim Curtis 2017 http://moodeaudio.org
 #
@@ -23,43 +32,104 @@
 
 ////////////////////////////////////////////////////////
 //
-// STEP 1 - Download Raspbian Stretch Lite 2017-09-07
+// STEP 1 - Enable SSH and remove Auto-Resize task
+//
+// Use one of the two options below depending on what
+// type of host computer you are going to be using.
 //
 ////////////////////////////////////////////////////////
 
-Download the file to a computer that has SD Card image writing capability, then unzip it.
+////////////////////////////////////////////////////////
+// OPTION 1: Using Raspbian Linux (Raspberry Pi)
+////////////////////////////////////////////////////////
 
+1. Download Raspbian Stretch Lite 2017-09-07
+wget http://downloads.raspberrypi.org/raspbian_lite/images/raspbian_lite-2017-09-08/2017-09-07-raspbian-stretch-lite.zip
+sudo unzip 2017-09-07-raspbian-stretch-lite.zip
+sudo rm 2017-09-07-raspbian-stretch-lite.zip
+
+2. Mount the boot and root partitions
+LOOPDEV=$(sudo losetup -f)
+sudo losetup -P $LOOPDEV 2017-09-07-raspbian-stretch-lite.img
+sudo mkdir /mnt/p1
+sudo mkdir /mnt/p2
+sudo mount -t vfat "$LOOPDEV"p1 /mnt/p1
+sudo mount -t ext4 "$LOOPDEV"p2 /mnt/p2
+
+3. Enable SSH
+sudo touch /mnt/p1/ssh
+
+4. Optionally enable WiFi connection
+a. sudo nano /mnt/p1/wpa_supplicant.conf
+b. Paste the lines below into the file making approproate substitutions for SSID and PASSWORD
+c. Save the file (Ctrl-x y <return>)
+
+country=GB
+ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev
+update_config=1
+
+network={
+ssid="YourSSID"
+scan_ssid=1
+psk="YourPASSWORD"
+}
+
+5. Remove Auto-Resize task & switch to using std interface names (eth0, wlan0)
+sudo sed -i "s/init=.*//" /mnt/p1/cmdline.txt
+sudo sed -i "s/quiet.*//" /mnt/p1/cmdline.txt
+sudo rm /mnt/p2/etc/init.d/resize2fs_once
+# Configure to use standard interface names
+sudo sed -i "s/^/net.ifnames=0 /" /mnt/p1/cmdline.txt
+
+6. Cleanup
+sudo losetup -D
+sudo umount /mnt/p1
+sudo umount /mnt/p2
+sudo rmdir /mnt/p1
+sudo rmdir /mnt/p2
+
+7. Install the modified 2017-09-07-raspbian-stretch-lite.img to an SD Card 
+
+8. sudo poweroff
+
+////////////////////////////////////////////////////////
+// OPTION 2: Using Windows or Mac computer
+////////////////////////////////////////////////////////
+
+1. Download Raspbian Stretch Lite 2017-09-07
 http://downloads.raspberrypi.org/raspbian_lite/images/raspbian_lite-2017-09-08/2017-09-07-raspbian-stretch-lite.zip
 
-////////////////////////////////////////////////////////
-//
-// STEP 2 - Enable SSH and remove the Auto-Expand task
-//
-////////////////////////////////////////////////////////
+2. Unzip and install the .img file to an SD Card
+https://www.raspberrypi.org/documentation/installation/installing-images/
 
-1. Copy the Stretch Lite image file to a USB stick.
-2. Insert the USB stick in a computer running Linux.
+3. Eject the SD Card and then re-insert it
+4. Open File Manager (Windows) or Finder (Mac)
+5. Click the device named "boot" to show its contents
+6. Create an empty file named "ssh" in the boot directory
+7. Optionally enable WiFi connection 
+a. Create a file named wpa_supplicant.conf in the boot directory
+b. Paste the lines below into the file making approproate substitutions for SSID and PASSWORD
+c. Save the file
 
-NOTE: Offsets used in the mount commands are derived from partition data on 2017-09-07-raspbian-stretch-lite.img.
-Use "sudo fdisk -l -o Device,Start,Type | grep 0p" to print the partition data. Offset = Start * 512.
+country=GB
+ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev
+update_config=1
 
-sudo mkdir /mnt/tmp
-sudo mkdir /mnt/tmp1
-sudo mount /dev/sda1 /mnt/tmp
-sudo mount -v -o offset=4194304 -t vfat /mnt/tmp/2017-09-07-raspbian-stretch-lite.img /mnt/tmp1
-sudo touch /mnt/tmp1/ssh
-sudo sed -i "s/init=.*//" /mnt/tmp1/cmdline.txt
-sudo sed -i "s/quiet.*//" /mnt/tmp1/cmdline.txt
-sudo sed -i "s/^/net.ifnames=0 /" /mnt/tmp1/cmdline.txt
-sudo umount /mnt/tmp1
-sudo mount -v -o offset=48234496 -t ext4 /mnt/tmp/2017-09-07-raspbian-stretch-lite.img /mnt/tmp1
-sudo rm /mnt/tmp1/etc/init.d/resize2fs_once
-sudo umount /mnt/tmp1
-sudo umount /mnt/tmp
-sudo rm -rf /mnt/tmp*
-sync
+network={
+ssid="YourSSID"
+scan_ssid=1
+psk="YourPASSWORD"
+}
 
-3. Remove the USB stick.
+8. Edit the file named cmdline.txt
+
+# Remove the text below 
+quiet init=/usr/lib/raspi-config/init_resize.sh
+
+# Add this text to beginning of the line. Ensure there is a space between this text and the remaining text.
+net.ifnames=0
+
+9. Eject the SD Card
 
 ////////////////////////////////////////////////////////
 //
@@ -67,10 +137,9 @@ sync
 //
 ////////////////////////////////////////////////////////
 
-1. Write the image file contained on the USB stick to an SD Card.
-2. Insert the SD Card into a Raspberry Pi and POWER UP.
+1. Insert the SD Card into a Raspberry Pi and POWER UP.
 
-3. Change the current password (raspberry) to moodeaudio and the host name to moode.
+2. Change the current password (raspberry) to moodeaudio and the host name to moode.
 
 ssh pi@raspberrypi (pwd=raspberry)
 
@@ -78,16 +147,16 @@ echo "pi:moodeaudio" | sudo chpasswd
 sudo sed -i "s/raspberrypi/moode/" /etc/hostname
 sudo sed -i "s/raspberrypi/moode/" /etc/hosts
 
-4. Download moOde application sources and configs.
+3. Download moOde application sources and configs.
 
 NOTE: We are downloading the Sources in this particular step in order to obtain the resizefs.sh file.
 
-// moOde 4 Beta 7
+// moOde 4 Beta 8
 cd ~
-wget http://moodeaudio.org/downloads/beta/r40b7/rel-stretch.zip
+wget http://moodeaudio.org/downloads/beta/r40b8/rel-stretch.zip
 sudo unzip ./rel-stretch.zip
 
-5. Expand the root partition to 3GB.
+4. Expand the root partition to 3GB.
 
 sudo cp ./rel-stretch/www/command/resizefs.sh ./
 sudo chmod 0755 ./resizefs.sh
@@ -245,11 +314,11 @@ libboost-dev \
 libicu-dev \
 libglib2.0-dev
 
-3. Download MPD 0.20.10 sources and prep for compile.
+3. Download MPD 0.20.11 sources and prep for compile.
 
-sudo wget http://www.musicpd.org/download/mpd/0.20/mpd-0.20.10.tar.xz
-sudo tar xf mpd-0.20.10.tar.xz
-cd mpd-0.20.10
+sudo wget http://www.musicpd.org/download/mpd/0.20/mpd-0.20.11.tar.xz
+sudo tar xf mpd-0.20.11.tar.xz
+cd mpd-0.20.11
 sudo sh autogen.sh
 
 4. Configure compile options.
@@ -274,7 +343,7 @@ sudo make
 sudo make install
 sudo strip --strip-unneeded /usr/local/bin/mpd
 cd ~
-sudo rm -rf ./mpd-0.20.10*
+sudo rm -rf ./mpd-0.20.11*
 
 sudo apt-get clean
 sudo apt-get autoremove
@@ -304,7 +373,9 @@ sudo mkdir /var/local/www/jsw
 sudo mkdir /var/local/www/imagesw
 sudo mkdir /var/local/www/imagesw/toggle
 sudo mkdir /var/local/www/db
-sudo mkdir /var/local/www/templatesw#
+sudo mkdir /var/local/www/templatesw
+sudo chmod -R 0755 /var/local/www
+
 sudo mkdir /var/lib/mpd/music/RADIO
 sudo mkdir /mnt/NAS
 sudo mkdir /mnt/SDCARD
@@ -439,7 +510,7 @@ sudo reboot
 
 ////////////////////////////////////////////////////////
 //
-// STEP 12 - Install latest Linux Kernel
+// STEP 12 - Optionally, install latest Linux Kernel
 //
 ////////////////////////////////////////////////////////
 
@@ -595,10 +666,9 @@ OPTION A: Copy squeezelite pre-compiled binaries for armv6l and armv7l
 
 sudo cp ./rel-stretch/other/squeezelite/squeezelite-1.8.7-999-armv6l /usr/local/bin/squeezelite-armv6l
 sudo cp ./rel-stretch/other/squeezelite/squeezelite-1.8.7-999-armv7l /usr/local/bin/squeezelite-armv7l
-
-Sources: ./rel-stretch/other/squeezelite-master.zip
+# Corresponding Sources: ./rel-stretch/other/squeezelite-master.zip
  
-OPTION B: Compile squeezelite from Sources (to get latest version)
+OPTION B: Compile squeezelite from latest Sources
 
 sudo git clone https://github.com/ralph-irving/squeezelite
 cd ./squeezelite
@@ -619,7 +689,7 @@ sudo cp ./squeezelite /usr/local/bin/squeezelite-armv7l
 cd ~
 sudo rm -rf ./squeezelite
 
-3. See STEP 7 main procedure 
+3. See STEP 9 main procedure 
 
 #sudo chmod 0644 /lib/systemd/system/squeezelite-armv6l.service
 #sudo chmod 0644 /lib/systemd/system/squeezelite-armv7l.service
@@ -637,7 +707,7 @@ sudo rm -rf ./squeezelite
 1. Dev libraries
 
 sudo apt-get -y install libmicrohttpd-dev libexpat1-dev \
-libjsoncpp-dev python-requests python-pip
+libxml2-dev libxslt1-dev libjsoncpp-dev python-requests python-pip
 
 sudo pip install gmusicapi
 
