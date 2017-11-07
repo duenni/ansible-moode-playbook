@@ -4,4 +4,6 @@
 #- include_tasks: step_6_install_rotary_encoder_driver.yml
 #- include_tasks: step_7_compile_and_install_mpd.yml
 #- include_tasks: step_8_create_moode_runtime_env.yml
-- include_tasks: step_9_install_moode_sources_and_configs.yml
+#- include_tasks: step_9_install_moode_sources_and_configs.yml
+#- include_tasks: step_10_alsaequal.yml
+- include_tasks: step_11_squash_var_www.yml

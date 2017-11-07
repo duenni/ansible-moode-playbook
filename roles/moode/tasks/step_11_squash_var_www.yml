@@ -1,0 +1,23 @@
+- name: Step 11 - add squashfs entry to fstab
+  become: true
+  lineinfile:
+    dest: /etc/fstab
+    line: '/var/local/moode.sqsh   /var/www        squashfs        ro,defaults     0       0'
+
+- name: Step 11 - delete moode.sqsh
+  become: true
+  file:
+    state: absent
+    path: /var/local/moode.sqsh
+
+- name: Step 11 - add squashfs entry to fstab
+  become: true
+  shell: mksquashfs /var/www /var/local/moode.sqsh creates=/var/local/moode.sqsh
+
+- name: Step 11 - delete /var/www
+  become: true
+  file:
+    state: absent
+    path: /var/www
+
+#Add REBOOT
