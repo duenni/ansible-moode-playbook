@@ -100,16 +100,19 @@
     content: ""
     mode: 0777
 
-#- name: Step 9 - disable services
-#  become: true
-#  systemd:
-#    name: "{{ item }}"
-#    state: stopped
-#    enabled: no
-#    daemon_reload: yes
-#  with_items:
-#    - squeezelite-armv6l
-#    - squeezelite-armv7l
-#    - upmpdcli.service
+- name: Step 9 - disable services
+  become: true
+  systemd:
+    name: "{{ item }}"
+    state: stopped
+    enabled: no
+    daemon_reload: yes
+  with_items:
+    - mpd.service
+    - mpd.socket
+    - rotenc.service
+    - squeezelite-armv6l
+    - squeezelite-armv7l
+    - upmpdcli.service
 
 #REBOOT here
