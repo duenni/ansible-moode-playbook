@@ -99,5 +99,6 @@
   apt:
     autoclean: yes
     autoremove: yes
-
-#Add REBOOT here
+  notify:
+    - reboot
+    - wait for reboot to finish

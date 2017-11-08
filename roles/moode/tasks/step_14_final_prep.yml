@@ -1,0 +1,33 @@
+- name: Step 14 - fsck
+  become: true
+  shell: "{{ item }}"
+  with_items:
+    - umount /boot
+    - dosfsck -tawl /dev/mmcblk0p1
+    - dosfsck -r /dev/mmcblk0p1
+    - dosfsck -V /dev/mmcblk0p1
+    - mount /boot
+
+- name: Step 14 - delete DHCP lease files
+  become: true
+  file: 
+    state: absent
+    path: "{{ item}}"
+  with_items:
+    - /var/lib/dhcp/
+    - /var/lib/dhcpcd5/
+
+- name: Step 14 - copy files
+  become: true
+  copy:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    remote_src: yes
+  with_items:
+    - { src: '/home/pi/rel-stretch/network/interfaces.default', dest: '/etc/network/interfaces' }
+    - { src: '/home/pi/rel-stretch/network/wpa_supplicant.conf.default', dest: '/etc/wpa_supplicant/wpa_supplicant.conf' }
+    - { src: '/home/pi/rel-stretch/network/dhcpcd.conf.default ', dest: '/etc/dhcpcd.conf' }
+    - { src: '/home/pi/rel-stretch/network/hostapd.conf.default ', dest: '/etc/hostapd/hostapd.conf' }
+  notify:
+    - reboot
+    - wait for reboot to finish

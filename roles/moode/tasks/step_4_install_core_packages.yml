@@ -26,6 +26,9 @@
     upgrade: yes
     update_cache: yes
     cache_valid_time: 86400 #One day. Update the apt cache if its older than the cache_valid_time. 
+    notify:
+      - reboot
+      - wait for reboot to finish
 
 - name: Step 4 - install core packages
   become: true

@@ -19,5 +19,6 @@
   file:
     state: absent
     path: /var/www
-
-#Add REBOOT
+  notify:
+    - reboot
+    - wait for reboot to finish

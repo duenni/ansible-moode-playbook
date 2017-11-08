@@ -114,5 +114,6 @@
     - squeezelite-armv6l
     - squeezelite-armv7l
     - upmpdcli.service
-
-#REBOOT here
+  notify:
+    - reboot
+    - wait for reboot to finish

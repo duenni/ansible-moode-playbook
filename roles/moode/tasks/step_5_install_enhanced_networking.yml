@@ -87,5 +87,6 @@
     path: /var/run/bluealsa
     state: directory
     recurse: yes #works like mkdir -p
-
-#Add REBOOT here
+  notify:
+    - reboot
+    - wait for reboot to finish
