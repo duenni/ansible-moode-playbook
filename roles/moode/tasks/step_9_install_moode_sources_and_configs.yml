@@ -9,15 +9,15 @@
 
 - name: Step 9 - copy dir contents
   become: true
-  command: cp -r "{{ item.src }}" "{{ item.dest }}"
+  shell: cp -r "{{ item.src }}" "{{ item.dest }}"
   with_items:
-    - { src: '/home/pi/rel-stretch/mpd/RADIO', dest: '/var/lib/mpd/music/' }
-    - { src: '/home/pi/rel-stretch/mpd/playlists', dest: '/var/lib/mpd/' }
-    - { src: '/home/pi/rel-stretch/etc', dest: '/' }
-    - { src: '/home/pi/rel-stretch/lib', dest: '/' }
-    - { src: '/home/pi/rel-stretch/usr', dest: '/' }
-    - { src: '/home/pi/rel-stretch/var', dest: '/' }
-    - { src: '/home/pi/rel-stretch/www', dest: '/var/' }
+    - { src: '/home/pi/rel-stretch/mpd/RADIO', dest: '/var/lib/mpd/music/RADIO' }
+    - { src: '/home/pi/rel-stretch/mpd/playlists', dest: '/var/lib/mpd/playlists' }
+    - { src: '/home/pi/rel-stretch/etc', dest: '/etc' }
+    - { src: '/home/pi/rel-stretch/lib', dest: '/lib' }
+    - { src: '/home/pi/rel-stretch/usr', dest: '/usr' }
+    - { src: '/home/pi/rel-stretch/var', dest: '/var' }
+    - { src: '/home/pi/rel-stretch/www', dest: '/var/www' }
 
 - name: Step 9 - copy dir contents in home
   copy:
@@ -49,7 +49,6 @@
 - name: Step 9 - chmod 0755
   become: true
   file: 
-    state: absent
     path: "{{ item }}"
     mode: 0755
   with_items:
@@ -59,7 +58,6 @@
 - name: Step 9 - chmod 0666
   become: true
   file: 
-    state: absent
     path: "{{ item }}"
     mode: 0666
   with_items:
@@ -68,7 +66,6 @@
 - name: Step 9 - chmod 0644
   become: true
   file: 
-    state: absent
     path: "{{ item }}"
     mode: 0644
   with_items:
@@ -86,7 +83,6 @@
 - name: Step 9 - chmod 0777
   become: true
   file: 
-    state: absent
     path: "{{ item }}"
     mode: 0777
   with_items:
