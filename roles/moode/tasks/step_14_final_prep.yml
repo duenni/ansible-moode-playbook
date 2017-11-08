@@ -26,8 +26,13 @@
   with_items:
     - { src: '/home/pi/rel-stretch/network/interfaces.default', dest: '/etc/network/interfaces' }
     - { src: '/home/pi/rel-stretch/network/wpa_supplicant.conf.default', dest: '/etc/wpa_supplicant/wpa_supplicant.conf' }
-    - { src: '/home/pi/rel-stretch/network/dhcpcd.conf.default ', dest: '/etc/dhcpcd.conf' }
-    - { src: '/home/pi/rel-stretch/network/hostapd.conf.default ', dest: '/etc/hostapd/hostapd.conf' }
+    - { src: '/home/pi/rel-stretch/network/dhcpcd.conf.default', dest: '/etc/dhcpcd.conf' }
+    - { src: '/home/pi/rel-stretch/network/hostapd.conf.default', dest: '/etc/hostapd/hostapd.conf' }
+
+- name: reboot
+  become: true
+  command: sleep 2 && shutdown -r now
+  async: 1
+  poll: 0
   notify:
-    - reboot
     - wait for reboot to finish

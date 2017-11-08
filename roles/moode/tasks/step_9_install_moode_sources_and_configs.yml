@@ -93,13 +93,6 @@
     - /var/local/www/playhistory.log
     - /var/local/www/currentsong.txt
 
-- name: Step 9 - touch libcache.json
-  become: true
-  copy: 
-    dest: /var/local/www/libcache.json
-    content: ""
-    mode: 0777
-
 - name: Step 9 - disable services
   become: true
   systemd:
@@ -114,6 +107,13 @@
     - squeezelite-armv6l
     - squeezelite-armv7l
     - upmpdcli.service
+
+- name: Step 9 - touch libcache.json
+  become: true
+  copy: 
+    dest: /var/local/www/libcache.json
+    content: ""
+    mode: 0777
   notify:
     - reboot
     - wait for reboot to finish
