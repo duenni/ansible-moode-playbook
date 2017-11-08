@@ -1,0 +1,12 @@
+- name: Step 12 - rpi-update
+  become: true
+  shell: PRUNE_MODULES=1 rpi-update
+  notify:
+    - reboot
+    - wait for reboot to finish
+
+- name: Step 11 - rm modules.bak
+  become: true
+  file:
+    state: absent
+    path: /lib/modules.bak
