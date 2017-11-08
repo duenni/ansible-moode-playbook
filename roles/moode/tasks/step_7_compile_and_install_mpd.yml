@@ -67,26 +67,26 @@
     - libicu-dev
     - libglib2.0-dev
 
-- name: Step 7 - download MPD 0.20.10 sources
+- name: Step 7 - download MPD 0.20.11 sources
   get_url:
-    url: http://www.musicpd.org/download/mpd/0.20/mpd-0.20.10.tar.xz
+    url: http://www.musicpd.org/download/mpd/0.20/mpd-0.20.11.tar.xz
     dest: /home/pi
 
 - name: Step 7 - untar MPD sources archive
   unarchive:
-    src: /home/pi/mpd-0.20.10.tar.xz
+    src: /home/pi/mpd-0.20.11.tar.xz
     dest: /home/pi
     remote_src: yes
 
 - name: Step 7 - run autogen.sh
   become: true
-  shell: chdir=/home/pi/mpd-0.20.10 sh autogen.sh
+  shell: chdir=/home/pi/mpd-0.20.11 sh autogen.sh
 
 - name: Step 7 - MPD configure && make && make install
   become: true
   command: "{{ item }}"
   args:
-    chdir: /home/pi/mpd-0.20.10
+    chdir: /home/pi/mpd-0.20.11
     creates: /usr/local/bin/mpd
   with_items:
     - ./configure --enable-database --enable-libmpdclient --enable-alsa --enable-curl --enable-dsd --enable-ffmpeg --enable-flac --enable-id3 --enable-soundcloud --enable-lame-encoder --enable-mad --enable-mpg123 --enable-pipe-output --enable-recorder-output --enable-shout --enable-vorbis --enable-wave-encoder --enable-wavpack --enable-httpd-output --enable-soxr --with-zeroconf=avahi --disable-bzip2 --disable-zzip --disable-fluidsynth --disable-gme --disable-wildmidi --disable-sqlite --disable-jack --disable-ao --disable-oss --disable-ipv6 --disable-pulse --disable-nfs --disable-smbclient --disable-upnp --disable-expat --disable-lsr --disable-sndfile --disable-audiofile --disable-sidplay
@@ -94,7 +94,7 @@
     - make install
     - strip --strip-unneeded /usr/local/bin/mpd
 
-- name: Step 7 - apt clean & autoremoce
+- name: Step 7 - apt clean & autoremove
   become: true
   apt:
     autoclean: yes
