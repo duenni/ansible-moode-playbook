@@ -29,7 +29,7 @@
     - { src: '/home/pi/rel-stretch/network/dhcpcd.conf.default', dest: '/etc/dhcpcd.conf' }
     - { src: '/home/pi/rel-stretch/network/hostapd.conf.default', dest: '/etc/hostapd/hostapd.conf' }
 
-- name: reboot
+- name: Step 14 - reboot
   become: true
   command: sleep 2 && shutdown -r now
   async: 1
