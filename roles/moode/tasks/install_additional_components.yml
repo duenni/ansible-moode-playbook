@@ -1,0 +1,67 @@
+
+#MiniDLNA
+- name: MiniDLNA - apt-get
+  become: true
+  shell: apt-get -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" install minidlna
+
+- name: MiniDLNA - systemd
+  become: true
+  systemd:
+    name: minidlna
+    state: stopped
+    enabled: no
+
+- name: MiniDLNA - install djmount
+  become: true
+  apt: name=djmount state=present
+
+#Ashuffle
+- name: Autoshuffle - git checkout autoshuffle
+  become: true
+  git:
+    repo:  git://github.com/Joshkunz/ashuffle.git
+    dest: /home/pi/ashuffle
+
+- name: Autoshuffle - make
+  become: true
+  shell: chdir=/home/pi/ashuffle make creates=/home/pi/ashuffle/ashuffle
+
+- name: Ashuffle - copy package
+  become: true
+  copy:
+    src: /home/pi/ashuffle/ashuffle
+    dest: /usr/local/bin/ashuffle
+    remote_src: yes
+
+- name: Ashuffle - del git dir
+  become: true
+  file: 
+    state: absent
+    path: /home/pi/ashuffle
+
+#MPD Audio Scrobbler
+- name: MPD Audio Scrobbler - git checkout autoshuffle
+  become: true
+  git:
+    repo:  git://github.com/hrkfdn/mpdas
+    dest: /home/pi/mpdas
+
+- name: MPD Audio Scrobbler - make
+  become: true
+  shell: chdir=/home/pi/mpdas make creates=/home/pi/mpdas/mpdas
+
+- name: MPD Audio Scrobbler - copy package
+  become: true
+  copy:
+    src: /home/pi/mpdas/mpdas
+    dest: /usr/local/bin/mpdas
+    remote_src: yes
+
+- name: MPD Audio Scrobbler - copy config file
+  become: true
+  copy: 
+    src: /home/pi/rel-stretch/usr/local/etc/mpdasrc.default
+    dest: /usr/local/etc/mpdasrc
+    mode: 0755
+    remote_src: yes
+
