@@ -11,13 +11,13 @@
   become: true
   shell: cp -r "{{ item.src }}" "{{ item.dest }}"
   with_items:
-    - { src: '/home/pi/rel-stretch/mpd/RADIO', dest: '/var/lib/mpd/music/RADIO' }
-    - { src: '/home/pi/rel-stretch/mpd/playlists', dest: '/var/lib/mpd/playlists' }
-    - { src: '/home/pi/rel-stretch/etc', dest: '/etc' }
-    - { src: '/home/pi/rel-stretch/lib', dest: '/lib' }
-    - { src: '/home/pi/rel-stretch/usr', dest: '/usr' }
-    - { src: '/home/pi/rel-stretch/var', dest: '/var' }
-    - { src: '/home/pi/rel-stretch/www', dest: '/var/www' }
+    - { src: '/home/pi/rel-stretch/mpd/RADIO', dest: '/var/lib/mpd/music' }
+    - { src: '/home/pi/rel-stretch/mpd/playlists', dest: '/var/lib/mpd' }
+    - { src: '/home/pi/rel-stretch/etc', dest: '/' }
+    - { src: '/home/pi/rel-stretch/lib', dest: '/' }
+    - { src: '/home/pi/rel-stretch/usr', dest: '/' }
+    - { src: '/home/pi/rel-stretch/var', dest: '/' }
+    - { src: '/home/pi/rel-stretch/www', dest: '/var' }
 
 - name: Step 9 - copy dir contents in home
   copy:
@@ -110,6 +110,12 @@
     dest: /var/local/www/libcache.json
     content: ""
     mode: 0777
-  notify:
-    - reboot
-    - wait for reboot to finish
+
+- name: Step 9 - reboot
+  become: true
+  shell: shutdown -r +1
+  async: 0
+  poll: 0
+
+- name: Step 9 - wait for pi to return after reboot
+  local_action: wait_for_connection host={{ ansible_hostname }} state=started port=22 delay=30 timeout=120

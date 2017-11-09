@@ -99,6 +99,12 @@
   apt:
     autoclean: yes
     autoremove: yes
-  notify:
-    - reboot
-    - wait for reboot to finish
+
+- name: Step 7 - reboot
+  become: true
+  shell: shutdown -r +1
+  async: 0
+  poll: 0
+
+- name: Step 7 - wait for pi to return after reboot
+  local_action: wait_for_connection host={{ ansible_hostname }} state=started port=22 delay=30 timeout=120
