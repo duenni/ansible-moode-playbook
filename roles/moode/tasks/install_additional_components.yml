@@ -65,3 +65,68 @@
     mode: 0755
     remote_src: yes
 
+#Shairport-sync
+- name: Shairport-sync - install packages
+  become: true
+  apt: name={{ item }} state=present
+  with_items:
+    - autoconf
+    - libtool
+    - libdaemon-dev
+    - libasound2-dev
+    - libpopt-dev
+    - libconfig-dev
+    - avahi-daemon
+    - libavahi-client-dev
+    - libssl-dev
+    - libsoxr-dev
+
+- name: Shairport-sync - git checkout shairport-sync
+  become: true
+  git:
+    repo:  git://github.com/mikebrady/shairport-sync.git
+    dest: /home/pi/shairport-sync
+
+- name: Shairport-sync - autoreconf 
+  become: true
+  shell: "{{ item }}"
+  args:
+    chdir: /home/pi/shairport-sync
+  with_items:
+    - autoreconf -i -f
+    - ./configure --with-alsa --with-avahi --with-ssl=openssl --with-soxr --with-metadata --with-stdout --with-systemd
+    - make
+    - make install
+
+- name: Shairport-sync - systemd
+  become: true
+  systemd:
+    name: shairport-sync
+    state: stopped
+    enabled: no
+
+- name: Shairport-sync - copy config file
+  become: true
+  copy: 
+    src: /home/pi/rel-stretch/usr/local/etc/shairport-sync.conf
+    dest: /usr/local/etc/shairport-sync.conf
+    remote_src: yes
+
+#Squeezelite
+- name: Squeezelite - copy precompiled binarys armv6l
+  become: true
+  copy: 
+    src: /home/pi/rel-stretch/other/squeezelite/squeezelite-1.8.7-999-armv6l
+    dest: /usr/local/bin/squeezelite-armv6l
+    remote_src: yes
+  when: "ansible_architecture == 'armv6l'"
+
+- name: Squeezelite - copy precompiled binarys armv7l
+  become: true
+  copy: 
+    src: /home/pi/rel-stretch/other/squeezelite/squeezelite-1.8.7-999-armv7l
+    dest: /usr/local/bin/squeezelite-armv7l
+    remote_src: yes
+  when: "ansible_architecture == 'armv7l'"
+
+#Upmpdcli
