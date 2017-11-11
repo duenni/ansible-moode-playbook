@@ -2,7 +2,10 @@
 #MiniDLNA
 - name: MiniDLNA - apt-get
   become: true
-  shell: apt-get -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" install minidlna
+  apt:
+    name: minidlna
+    dpkg_options: 'force-confold,force-confdef'
+    state: present
 
 - name: MiniDLNA - systemd
   become: true
@@ -24,7 +27,7 @@
 
 - name: Autoshuffle - make
   become: true
-  shell: chdir=/home/pi/ashuffle make creates=/home/pi/ashuffle/ashuffle
+  shell: chdir=/home/pi/ashuffle make creates=/usr/local/bin/ashuffle
 
 - name: Ashuffle - copy package
   become: true
@@ -33,14 +36,8 @@
     dest: /usr/local/bin/ashuffle
     remote_src: yes
 
-- name: Ashuffle - del git dir
-  become: true
-  file: 
-    state: absent
-    path: /home/pi/ashuffle
-
 #MPD Audio Scrobbler
-- name: MPD Audio Scrobbler - git checkout autoshuffle
+- name: MPD Audio Scrobbler - git checkout MPD Audio Scrobbler
   become: true
   git:
     repo:  git://github.com/hrkfdn/mpdas
@@ -48,7 +45,7 @@
 
 - name: MPD Audio Scrobbler - make
   become: true
-  shell: chdir=/home/pi/mpdas make creates=/home/pi/mpdas/mpdas
+  shell: chdir=/home/pi/mpdas make creates=/usr/local/bin/mpdas
 
 - name: MPD Audio Scrobbler - copy package
   become: true
@@ -87,11 +84,12 @@
     repo:  git://github.com/mikebrady/shairport-sync.git
     dest: /home/pi/shairport-sync
 
-- name: Shairport-sync - autoreconf 
+- name: Shairport-sync - autoreconf - configure - make - make install
   become: true
   shell: "{{ item }}"
   args:
     chdir: /home/pi/shairport-sync
+    creates: /usr/local/bin/shairport-sync
   with_items:
     - autoreconf -i -f
     - ./configure --with-alsa --with-avahi --with-ssl=openssl --with-soxr --with-metadata --with-stdout --with-systemd
@@ -130,3 +128,170 @@
   when: "ansible_architecture == 'armv7l'"
 
 #Upmpdcli
+- name: Upmpdcli - install packages
+  become: true
+  apt: name={{ item }} state=present
+  with_items:
+    - libmicrohttpd-dev
+    - libexpat1-dev
+    - libxml2-dev
+    - libxslt1-dev
+    - libjsoncpp-dev
+    - python-requests
+    - python-pip
+
+- name: Upmpdcli - install gmusicapi with pip
+  become: true
+  pip:
+    name: gmusicapi
+
+- name: Upmpdcli - copy libupnp-jfd5 archive
+  become: true
+  copy: 
+    src: /home/pi/rel-stretch/other/upmpdcli/libupnp-1.6.20.jfd5.tar.gz
+    dest: /home/pi
+    remote_src: yes
+
+- name: Upmpdcli - untar libupnp-jfd5 archive
+  become: true
+  unarchive:
+    src: /home/pi/libupnp-1.6.20.jfd5.tar.gz
+    dest: /home/pi
+    remote_src: yes
+
+- name: Upmpdcli - libupnp-jfd5 autoreconf - configure - make - make install
+  become: true
+  shell: "{{ item }}"
+  args:
+    chdir: /home/pi/libupnp-1.6.20.jfd5
+    creates: /usr/lib/libupnp.so.6.3.4
+  with_items:
+    - ./configure --prefix=/usr --sysconfdir=/etc
+    - make
+    - make install
+
+- name: Upmpdcli - copy libupnp archive
+  become: true
+  copy: 
+    src: /home/pi/rel-stretch/other/upmpdcli/libupnpp-0.16.0.tar.gz
+    dest: /home/pi
+    remote_src: yes
+
+- name: Upmpdcli - untar libupnp archive
+  become: true
+  unarchive:
+    src: /home/pi/libupnpp-0.16.0.tar.gz
+    dest: /home/pi
+    remote_src: yes
+
+- name: Upmpdcli - libupnp - configure - make - make install
+  become: true
+  shell: "{{ item }}"
+  args:
+    chdir: /home/pi/libupnpp-0.16.0
+    creates: /usr/lib/libupnpp.so.7.0.0
+  with_items:
+    - ./configure --prefix=/usr --sysconfdir=/etc
+    - make
+    - make install
+
+
+- name: Upmpdcli - copy upmpdcli archive
+  become: true
+  copy: 
+    src: /home/pi/rel-stretch/other/upmpdcli/upmpdcli-1.2.15.tar.gz
+    dest: /home/pi
+    remote_src: yes
+
+- name: Upmpdcli - untar upmpdcli archive
+  become: true
+  unarchive:
+    src: /home/pi/upmpdcli-1.2.15.tar.gz
+    dest: /home/pi
+    remote_src: yes
+
+- name: Upmpdcli - upmpdcli - configure - make - make install
+  become: true
+  shell: "{{ item }}"
+  args:
+    chdir: /home/pi/upmpdcli-1.2.15
+    creates: /usr/bin/upmpdcli
+  with_items:
+    - ./configure --prefix=/usr --sysconfdir=/etc
+    - make
+    - make install
+
+- name: Upmpdcli - upmpdcli create user
+  become: true
+  user:
+    name: upmpdcli
+
+- name: Upmpdcli- upmpdcli copy contents
+  become: true
+  copy:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    remote_src: yes
+  with_items:
+    - { src: '/home/pi/rel-stretch/lib/systemd/system/upmpdcli.service', dest: '/lib/systemd/system/upmpdcli.service' }
+    - { src: '/home/pi/rel-stretch/etc/upmpdcli.conf', dest: '/etc/upmpdcli.conf' }
+
+- name: Upmpdcli - disable service
+  become: true
+  systemd:
+    name: upmpdcli
+    state: stopped
+    enabled: no
+    daemon_reload: yes
+
+#upexplorer
+- name: upexplorer - git checkout upexplorer
+  become: true
+  git:
+    repo:  https://@opensourceprojects.eu/git/p/libupnppsamples/code
+    dest: /home/pi/libupnppsamples-code
+
+- name: upexplorer - autogen.sh - configure - make - make install
+  become: true
+  shell: "{{ item }}"
+  args:
+    chdir: /home/pi/libupnppsamples-code
+    creates: /usr/local/bin/upexplorer
+  with_items:
+    - ./autogen.sh
+    - ./configure
+    - make
+    - make install
+
+#Final clean up
+- name: delete build dirs and files
+  become: true
+  file: 
+    state: absent
+    path: "{{ item }}"
+  with_items:
+    - /home/pi/ashuffle
+    - /home/pi/mpdas/mpdas
+    - /home/pi/shairport-sync
+    - /home/pi/libupnp-1.6.20.jfd5
+    - /home/pi/libupnpp-0.16.0
+    - /home/pi/upmpdcli-1.2.15
+    - /home/pi/libupnppsamples-code
+
+- name: apt clean
+  become: true
+  apt:
+    autoclean: yes
+
+- name: clear syslogs
+  become: true
+  shell: /var/www/command/util.sh clear-syslogs
+
+- name: reboot
+  become: true
+  shell: shutdown -r +1
+  async: 0
+  poll: 0
+
+- name: wait for pi to return after reboot
+  local_action: wait_for_connection host={{ ansible_hostname }} state=started port=22 delay=30 timeout=120
