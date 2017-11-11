@@ -21,3 +21,8 @@ What you need:
 * Clone repo to control machine: `git clone https://github.com/duenni/ansible-moode-playbook.git`
 * `cd ansible-moode-playbook`
 * `ansible-playbook site.yml`
+
+Tested with:
+* `ansible 2.4.1.0`
+* Raspberry Pi 3 Model B
+* moode 4 Beta 8 with `build_recipe_v1.6.txt`
