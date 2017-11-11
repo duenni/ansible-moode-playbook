@@ -1,9 +1,20 @@
 - name: Step 12 - rpi-update
   become: true
   shell: PRUNE_MODULES=1 rpi-update
-  notify:
-    - reboot
-    - wait for reboot to finish
+
+- name: Step 12 - reboot
+  become: true
+  shell: sleep 2 && shutdown -r now
+  async: 1
+  poll: 0
+
+- name: Step 12 - wait for pi to return after reboot
+  wait_for: >
+    host={{ ansible_default_ipv4.address }}
+    port=22
+    delay=10
+    timeout=120
+  delegate_to: localhost
 
 - name: Step 11 - rm modules.bak
   become: true

@@ -31,10 +31,14 @@
 
 - name: Step 14 - reboot
   become: true
-  shell: shutdown -r +1
-  async: 0
+  shell: sleep 2 && shutdown -r now
+  async: 1
   poll: 0
 
 - name: Step 14 - wait for pi to return after reboot
-  local_action: wait_for_connection host={{ ansible_hostname }} state=started port=22 delay=30 timeout=120
-  
+  wait_for: >
+    host={{ ansible_default_ipv4.address }}
+    port=22
+    delay=10
+    timeout=120
+  delegate_to: localhost
