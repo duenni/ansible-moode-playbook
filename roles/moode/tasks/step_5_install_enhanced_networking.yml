@@ -88,10 +88,6 @@
     state: directory
     recurse: yes #works like mkdir -p
 
-- name: Step 5 - set hostname to variable
-  set_fact:
-    host_to_wait_for: "{{ ansible_hostname | default(inventory_hostname) }}"
-
 - name: Step 5 - reboot
   become: true
   shell: sleep 2 && shutdown -r now
