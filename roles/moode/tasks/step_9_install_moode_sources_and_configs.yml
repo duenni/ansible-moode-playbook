@@ -35,8 +35,9 @@
 - name: Step 9 - chmod dir
   become: true
   file: 
-    path: /var/www/command/
+    path: /var/www/command
     mode: 0755
+    recurse: yes
 
 - name: Step 9 - execute util.sh
   become: true
