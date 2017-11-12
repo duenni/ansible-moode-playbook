@@ -1,0 +1,43 @@
+---
+
+#This is automatically done in Step 11 when building with site.yml
+- name: Squash /var/www
+  hosts: moode
+  remote_user: pi
+
+  tasks:
+  - name: Add squashfs entry to fstab
+    become: true
+    lineinfile:
+      dest: /etc/fstab
+      line: '/var/local/moode.sqsh   /var/www        squashfs        ro,defaults     0       0'
+
+  - name: Delete moode.sqsh
+    become: true
+    file:
+      state: absent
+      path: /var/local/moode.sqsh
+
+  - name: Add squashfs entry to fstab
+    become: true
+    shell: mksquashfs /var/www /var/local/moode.sqsh creates=/var/local/moode.sqsh
+
+  - name: Delete /var/www
+    become: true
+    file:
+      state: absent
+      path: /var/www
+
+  - name: Reboot
+    become: true
+    shell: sleep 2 && shutdown -r now
+    async: 1
+    poll: 0
+
+  - name: Wait for pi to return after reboot
+    wait_for: >
+      host={{ ansible_default_ipv4.address }}
+      port=22
+      delay=10
+      timeout=120
+    delegate_to: localhost

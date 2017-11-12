@@ -1,0 +1,59 @@
+---
+
+- name: Squash /var/www
+  hosts: moode
+  remote_user: pi
+
+  tasks:
+  - name: Kill watchdog.sh
+    become: true
+    shell:  (! pidof watchdog.sh) || sudo kill -9 $(watchdog.sh)
+
+  - name: Stop services
+    become: true
+    systemd:
+      name: "{{ item }}"
+      state: stopped
+    with_items:
+      - nginx
+      - php7.0-fpm
+
+  - name: Umount /var/www
+    become: true
+    mount:
+      path: /var/www
+      state: unmounted
+
+  - name: Delete /var/www
+    become: true
+    file: 
+      state: absent
+      path: /var/www
+
+  - name: Unsquash
+    become: true
+    shell: unsquashfs -d /var/www /var/local/moode.sqsh && sync
+
+  - name: sed /etc/fstab
+    become: true
+    shell: sed -i /moode.sqsh/d /etc/fstab
+
+  - name: delete moode.sqsh
+    become: true
+    file:
+      state: absent
+      path: /var/local/moode.sqsh
+
+  - name: Reboot
+    become: true
+    shell: sleep 2 && shutdown -r now
+    async: 1
+    poll: 0
+
+  - name: Wait for pi to return after reboot
+    wait_for: >
+      host={{ ansible_default_ipv4.address }}
+      port=22
+      delay=10
+      timeout=120
+    delegate_to: localhost
