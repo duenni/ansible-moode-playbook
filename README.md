@@ -18,7 +18,7 @@ What you need:
 * `sudo sed -i "s/raspberrypi/moode/" /etc/hostname`
 * `sudo sed -i "s/raspberrypi/moode/" /etc/hosts`
 * `sudo reboot`
-* Clone repo to control machine: `git clone https://github.com/duenni/ansible-moode-playbook.git`
+* Clone repo to control machine: `git clone https://github.com/duenni/ansible-moode-playbook.git` or download & unzip
 * `cd ansible-moode-playbook`
 * `ansible-playbook site.yml`
 
