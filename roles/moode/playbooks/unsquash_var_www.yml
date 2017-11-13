@@ -1,6 +1,6 @@
 ---
 
-- name: Squash /var/www
+- name: Unsquash /var/www
   hosts: moode
   remote_user: pi
 

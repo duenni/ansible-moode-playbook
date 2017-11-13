@@ -27,20 +27,6 @@
     update_cache: yes
     cache_valid_time: 86400 #One day. Update the apt cache if its older than the cache_valid_time. 
 
-- name: Step 4 - reboot
-  become: true
-  shell: sleep 2 && shutdown -r now
-  async: 1
-  poll: 0
-
-- name: Step 4 - wait for pi to return after reboot
-  wait_for: >
-    host={{ ansible_default_ipv4.address }}
-    port=22
-    delay=10
-    timeout=120
-  delegate_to: localhost
-
 - name: Step 4 - install core packages
   become: true
   apt: name={{item}} state=present

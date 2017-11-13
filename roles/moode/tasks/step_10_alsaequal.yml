@@ -1,4 +1,3 @@
-#NOT WORKING
 - name: Step 10 - generate alsaequal bin file
   become: true
   copy:
@@ -7,18 +6,6 @@
     owner: mpd
     group: audio
     mode: 0755
-#- name: Step 10 - generate alsaequal bin file
-#  become: true
-#  shell: killall -9 alsamixer creates=/usr/local/bin/alsaequal.bin
-
-
-#- name: Step 10 - chmod & chown alsaequal.bin
-#  become: true
-#  file:
-#    path: /usr/local/bin/alsaequal.bin
-#    owner: mpd
-#    group: audio
-#    mode: 0755
 
 - name: Step 10 - rm equal.conf
   become: true
