@@ -27,7 +27,7 @@
 
 - name: Autoshuffle - make
   become: true
-  shell: chdir=/home/pi/ashuffle make creates=/usr/local/bin/ashuffle
+  shell: chdir=/home/pi/ashuffle make creates=/home/pi/ashuffle/ashuffle
 
 - name: Ashuffle - copy package
   become: true
@@ -45,7 +45,7 @@
 
 - name: MPD Audio Scrobbler - make
   become: true
-  shell: chdir=/home/pi/mpdas make creates=/usr/local/bin/mpdas
+  shell: chdir=/home/pi/mpdas make creates=/home/pi/mpdas/mpdas
 
 - name: MPD Audio Scrobbler - copy package
   become: true
@@ -123,7 +123,7 @@
   shell: "{{ item }}"
   args:
     chdir: /tmp/squeezelite
-    creates: /usr/local/bin/squeezelite-armv6l
+    creates: /tmp/squeezelite/squeezelite
   with_items:
     - cat ./scripts/squeezelite-ralphy-dsd.patch | patch -p 0
     - make CFLAGS='-O3 -march=native -mcpu=native -DDSD -DRESAMPLE -fno-fast-math -mfloat-abi=hard -pipe -fPIC'
@@ -134,10 +134,26 @@
   shell: "{{ item }}"
   args:
     chdir: /tmp/squeezelite
-    creates: /usr/local/bin/squeezelite-armv7l
+    creates: /tmp/squeezelite/squeezelite
   with_items:
     - cat ./scripts/squeezelite-ralphy-dsd.patch | patch -p 0
     - make CFLAGS='-O3 -march=native -mcpu=native -DDSD -DRESAMPLE -fno-fast-math -mfloat-abi=hard -pipe -fPIC'
+  when: "ansible_architecture == 'armv7l'"
+
+- name: Squeezelite - copy file armv6l
+  become: true
+  copy: 
+    src: /tmp/squeezelite/squeezelite
+    dest: /usr/local/bin/squeezelite-armv6l
+    remote_src: yes
+  when: "ansible_architecture == 'armv6l'"
+
+- name: Squeezelite - copy file armv7l
+  become: true
+  copy: 
+    src: /tmp/squeezelite/squeezelite
+    dest: /usr/local/bin/squeezelite-armv7l
+    remote_src: yes
   when: "ansible_architecture == 'armv7l'"
 
 #Upmpdcli

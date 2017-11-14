@@ -1,14 +1,14 @@
 # step 1 is not a task for ansible
-#- include_tasks: step_2_prerequisites.yml
-#- include_tasks: step_3_install_core_packages.yml
-#- include_tasks: step_4_install_enhanced_networking.yml
-#- include_tasks: step_5_install_rotary_encoder_driver.yml
-#- include_tasks: step_6_compile_and_install_mpd.yml
-#- include_tasks: step_7_create_moode_runtime_env.yml
-#- include_tasks: step_8_install_moode_sources_and_configs.yml
-#- include_tasks: step_9_alsaequal.yml
-#- include_tasks: step_10_squash_var_www.yml
-#- include_tasks: step_11_install_latest_kernel.yml
+- include_tasks: step_2_prerequisites.yml
+- include_tasks: step_3_install_core_packages.yml
+- include_tasks: step_4_install_enhanced_networking.yml
+- include_tasks: step_5_install_rotary_encoder_driver.yml
+- include_tasks: step_6_compile_and_install_mpd.yml
+- include_tasks: step_7_create_moode_runtime_env.yml
+- include_tasks: step_8_install_moode_sources_and_configs.yml
+- include_tasks: step_9_alsaequal.yml
+- include_tasks: step_10_squash_var_www.yml
+- include_tasks: step_11_install_latest_kernel.yml
 # step 12 is not a task for ansible
-#- include_tasks: step_13_final_prep.yml
+- include_tasks: step_13_final_prep.yml
 - include_tasks: install_additional_components.yml
