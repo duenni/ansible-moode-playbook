@@ -1,11 +1,11 @@
-- name: Step 5 - install Host AP mode
+- name: Step 4 - install Host AP mode
   become: true
   apt: name={{item}} state=present
   with_items:
     - dnsmasq
     - hostapd
 
-- name: Step 5 - systemd disable hostapd & dnsmasq
+- name: Step 4 - systemd disable hostapd & dnsmasq
   become: true
   systemd:
     name: "{{ item }}"
@@ -16,7 +16,7 @@
     - hostapd
     - dnsmasq
 
-- name: Step 5 - install Bluetooth packages
+- name: Step 4 - install Bluetooth packages
   become: true
   apt: name={{ item }} state=present
   with_items:
@@ -36,23 +36,23 @@
     - libsbc1
     - libsbc-dev
 
-- name: Step 5 - git checkout bluez-alsa
+- name: Step 4 - git checkout bluez-alsa
   become: true
   git:
     repo: git://github.com/Arkq/bluez-alsa.git
     dest: /tmp/bluez-alsa
 
-- name: Step 5 - autoreconf bluez-alsa
+- name: Step 4 - autoreconf bluez-alsa
   become: true
   shell: chdir=/tmp/bluez-alsa autoreconf --install creates=/tmp/bluez-alsa/compile
 
-- name: Step 5 - mkdir build for bluez-alsa
+- name: Step 4 - mkdir build for bluez-alsa
   become: true
   file: 
     path: /tmp/bluez-alsa/build 
     state: directory
 
-- name: Step 5 - bluez-alsa configure && make && make install
+- name: Step 4 - bluez-alsa configure && make && make install
   become: true
   command: "{{ item }}"
   args:
@@ -63,13 +63,13 @@
     - make
     - make install
 
-- name: Step 5 - delete bluez-alsa build dirs
+- name: Step 4 - delete bluez-alsa build dirs
   become: true
   file: 
     state: absent
     path: /tmp/bluez-alsa
 
-- name: Step 5 - disable bluetooth, bluealsa and hcuistart 
+- name: Step 4 - disable bluetooth, bluealsa and hcuistart 
   become: true
   systemd:
     name: "{{ item }}"
@@ -81,20 +81,20 @@
     #- 'bluealsa.service'
     - 'hciuart.service'
 
-- name: Step 5 - mkdir var/run/bluealsa
+- name: Step 4 - mkdir var/run/bluealsa
   become: true
   file: 
     path: /var/run/bluealsa
     state: directory
     recurse: yes #works like mkdir -p
 
-- name: Step 5 - reboot
+- name: Step 4 - reboot
   become: true
   shell: sleep 2 && shutdown -r now
   async: 1
   poll: 0
 
-- name: Step 5 - wait for pi to return after reboot
+- name: Step 4 - wait for pi to return after reboot
   wait_for: >
     host={{ ansible_default_ipv4.address }}
     port=22

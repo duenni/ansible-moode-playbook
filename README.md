@@ -25,4 +25,4 @@ What you need:
 Tested with:
 * `ansible 2.4.1.0`
 * Raspberry Pi 3 Model B
-* moode 4 Beta 8 with `build_recipe_v1.6.txt`
+* moode 4 Beta 9 with `build_recipe_v1.7.txt`

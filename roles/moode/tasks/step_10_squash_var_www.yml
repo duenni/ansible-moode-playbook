@@ -1,32 +1,32 @@
-- name: Step 11 - add squashfs entry to fstab
+- name: Step 10 - add squashfs entry to fstab
   become: true
   lineinfile:
     dest: /etc/fstab
     line: '/var/local/moode.sqsh   /var/www        squashfs        ro,defaults     0       0'
 
-- name: Step 11 - delete moode.sqsh
+- name: Step 10 - delete moode.sqsh
   become: true
   file:
     state: absent
     path: /var/local/moode.sqsh
 
-- name: Step 11 - add squashfs entry to fstab
+- name: Step 10 - add squashfs entry to fstab
   become: true
   shell: mksquashfs /var/www /var/local/moode.sqsh creates=/var/local/moode.sqsh
 
-- name: Step 11 - delete /var/www
+- name: Step 10 - delete /var/www
   become: true
   file:
     state: absent
     path: /var/www
 
-- name: Step 11 - reboot
+- name: Step 10 - reboot
   become: true
   shell: sleep 2 && shutdown -r now
   async: 1
   poll: 0
 
-- name: Step 11 - wait for pi to return after reboot
+- name: Step 10 - wait for pi to return after reboot
   wait_for: >
     host={{ ansible_default_ipv4.address }}
     port=22

@@ -1,10 +1,10 @@
-- name: Step 8 - make sure we have a sudo group
+- name: Step 7 - make sure we have a sudo group
   become: true
   group:
     name: wheel
     state: present
 
-- name: Step 8 - allow sudo group to have passwordless sudo
+- name: Step 7 - allow sudo group to have passwordless sudo
   become: true
   lineinfile:
     path: /etc/sudoers
@@ -13,7 +13,7 @@
     line: '%wheel ALL=(ALL) NOPASSWD: ALL'
     validate: visudo -cf %s
 
-- name: Step 8 - add sudoers users to sudo group
+- name: Step 7 - add sudoers users to sudo group
   become: true
   user:
     name: "{{ item }}"
@@ -23,7 +23,7 @@
     - pi
     - www-data
 
-- name: Step 8 - mkdirs
+- name: Step 7 - mkdirs
   become: true
   file: 
     path: "{{ item }}"
@@ -40,7 +40,7 @@
     - /mnt/SDCARD
     - /mnt/UPNP
 
-- name: Step 8 - mkdirs && chmod
+- name: Step 7 - mkdirs && chmod
   become: true
   file: 
     path: "{{ item }}"
@@ -50,7 +50,7 @@
     - /var/lib/mpd/music/RADIO
     - /var/local/www/db
 
-- name: Step 8 - touch files
+- name: Step 7 - touch files
   become: true
   copy: 
     dest: "{{ item }}"
@@ -60,7 +60,7 @@
     - /var/log/moode.log
     - /var/log/php_errors.log
 
-- name: Step 8 - symlinks
+- name: Step 7 - symlinks
   become: true
   file: 
     src: "{{ item.path }}"
@@ -72,7 +72,7 @@
     - { path: '/media', dest: '/var/lib/mpd/music/USB' }
     - { path: '/var/lib/mpd/music', dest: '/var/www/mpdmusic' }
 
-- name: Step 8 - copy files
+- name: Step 7 - copy files
   become: true
   copy:
     src: "{{ item.src }}"
@@ -86,19 +86,19 @@
     - { src: '/home/pi/rel-stretch/network/hostapd.conf.default', dest: '/etc/hostapd/hostapd.conf' }
     - { src: '/home/pi/rel-stretch/var/local/www/db/moode-sqlite3.db.default', dest: '/var/local/www/db/moode-sqlite3.db' }
 
-- name: Step 8 - copy files recursively #remote_src: yes does not support recursive dir copy
+- name: Step 7 - copy files recursively #remote_src: yes does not support recursive dir copy
   become: true
   command: "cp -r {{ item.src }} {{ item.dest }}"
   with_items:
     - { src: "'/home/pi/rel-stretch/other/sdcard/Stereo Test/'", dest: '/var/lib/mpd/music/SDCARD' } #double quotes because there is a space in dir path
 
-- name: Step 8 - delete dir
+- name: Step 7 - delete dir
   become: true
   file: 
     state: absent
     path: /var/www/html
 
-- name: Step 8 - delete file
+- name: Step 7 - delete file
   become: true
   file: 
     state: absent

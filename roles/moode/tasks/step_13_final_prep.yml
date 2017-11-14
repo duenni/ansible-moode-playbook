@@ -1,4 +1,4 @@
-- name: Step 14 - fsck
+- name: Step 13 - fsck
   become: true
   shell: "{{ item }}"
   with_items:
@@ -8,7 +8,7 @@
     - dosfsck -V /dev/mmcblk0p1
     - mount /boot
 
-- name: Step 14 - delete DHCP lease files
+- name: Step 13 - delete DHCP lease files
   become: true
   file: 
     state: absent
@@ -17,7 +17,7 @@
     - /var/lib/dhcp/
     - /var/lib/dhcpcd5/
 
-- name: Step 14 - copy files
+- name: Step 13 - copy files
   become: true
   copy:
     src: "{{ item.src }}"
@@ -29,13 +29,13 @@
     - { src: '/home/pi/rel-stretch/network/dhcpcd.conf.default', dest: '/etc/dhcpcd.conf' }
     - { src: '/home/pi/rel-stretch/network/hostapd.conf.default', dest: '/etc/hostapd/hostapd.conf' }
 
-- name: Step 14 - reboot
+- name: Step 13 - reboot
   become: true
   shell: sleep 2 && shutdown -r now
   async: 1
   poll: 0
 
-- name: Step 14 - wait for pi to return after reboot
+- name: Step 13 - wait for pi to return after reboot
   wait_for: >
     host={{ ansible_default_ipv4.address }}
     port=22

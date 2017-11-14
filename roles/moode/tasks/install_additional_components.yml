@@ -111,20 +111,33 @@
     remote_src: yes
 
 #Squeezelite
-- name: Squeezelite - copy precompiled binarys armv6l
+- name: Squeezelite - git checkout squeezelite
   become: true
-  copy: 
-    src: /home/pi/rel-stretch/other/squeezelite/squeezelite-1.8.7-999-armv6l
-    dest: /usr/local/bin/squeezelite-armv6l
-    remote_src: yes
+  git:
+    repo: https://github.com/ralph-irving/squeezelite
+    dest: /tmp/squeezelite
+    force: yes
+
+- name: Squeezelite - make for armv6l
+  become: true
+  shell: "{{ item }}"
+  args:
+    chdir: /tmp/squeezelite
+    creates: /usr/local/bin/squeezelite-armv6l
+  with_items:
+    - cat ./scripts/squeezelite-ralphy-dsd.patch | patch -p 0
+    - make CFLAGS='-O3 -march=native -mcpu=native -DDSD -DRESAMPLE -fno-fast-math -mfloat-abi=hard -pipe -fPIC'
   when: "ansible_architecture == 'armv6l'"
 
-- name: Squeezelite - copy precompiled binarys armv7l
+- name: Squeezelite - make for amrv7l
   become: true
-  copy: 
-    src: /home/pi/rel-stretch/other/squeezelite/squeezelite-1.8.7-999-armv7l
-    dest: /usr/local/bin/squeezelite-armv7l
-    remote_src: yes
+  shell: "{{ item }}"
+  args:
+    chdir: /tmp/squeezelite
+    creates: /usr/local/bin/squeezelite-armv7l
+  with_items:
+    - cat ./scripts/squeezelite-ralphy-dsd.patch | patch -p 0
+    - make CFLAGS='-O3 -march=native -mcpu=native -DDSD -DRESAMPLE -fno-fast-math -mfloat-abi=hard -pipe -fPIC'
   when: "ansible_architecture == 'armv7l'"
 
 #Upmpdcli
@@ -139,11 +152,6 @@
     - libjsoncpp-dev
     - python-requests
     - python-pip
-
-- name: Upmpdcli - install gmusicapi with pip
-  become: true
-  pip:
-    name: gmusicapi
 
 - name: Upmpdcli - copy libupnp-jfd5 archive
   become: true
@@ -194,7 +202,6 @@
     - ./configure --prefix=/usr --sysconfdir=/etc
     - make
     - make install
-
 
 - name: Upmpdcli - copy upmpdcli archive
   become: true
@@ -248,7 +255,7 @@
 - name: upexplorer - git checkout upexplorer
   become: true
   git:
-    repo:  https://@opensourceprojects.eu/git/p/libupnppsamples/code
+    repo: https://@opensourceprojects.eu/git/p/libupnppsamples/code
     dest: /home/pi/libupnppsamples-code
 
 - name: upexplorer - autogen.sh - configure - make - make install
@@ -262,6 +269,12 @@
     - ./configure
     - make
     - make install
+
+#gmusicapi
+- name: gmusicapi - install with pip
+  become: true
+  pip:
+    name: gmusicapi
 
 #Final clean up
 - name: delete build dirs and files
@@ -277,6 +290,7 @@
     - /home/pi/libupnpp-0.16.0
     - /home/pi/upmpdcli-1.2.15
     - /home/pi/libupnppsamples-code
+    - /tmp/squeezelite
 
 - name: apt clean
   become: true

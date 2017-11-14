@@ -1,33 +1,33 @@
-- name: Step 4 - swapfile off
+- name: Step 3 - swapfile off
   become: true
   shell: dphys-swapfile swapoff && update-rc.d dphys-swapfile remove && rm -rf /var/swap
 
-- name: Step 4 - disable cron.service
+- name: Step 3 - disable cron.service
   become: true
   systemd:
     name: cron.service
     state: stopped
     enabled: no
 
-- name: Step 4 - enable rpcbind
+- name: Step 3 - enable rpcbind
   become: true
   systemd:
     name: rpcbind
     state: started
     enabled: yes
 
-- name: Step 4 - purge triggerhappy
+- name: Step 3 - purge triggerhappy
   become: true
   apt: name=triggerhappy state=absent
 
-- name: Step 4 - update and upgrade apt packages
+- name: Step 3 - update and upgrade apt packages
   become: true
   apt:
     upgrade: yes
     update_cache: yes
     cache_valid_time: 86400 #One day. Update the apt cache if its older than the cache_valid_time. 
 
-- name: Step 4 - install core packages
+- name: Step 3 - install core packages
   become: true
   apt: name={{item}} state=present
   with_items:
@@ -57,7 +57,7 @@
     - inotify-tools
     - libav-tools
 
-- name: Step 4 - disable shellinabox
+- name: Step 3 - disable shellinabox
   become: true
   systemd:
     name: shellinabox

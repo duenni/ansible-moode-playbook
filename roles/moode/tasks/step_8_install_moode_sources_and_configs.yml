@@ -1,4 +1,4 @@
-- name: Step 9 - delete dirs
+- name: Step 8 - delete dirs
   become: true
   file: 
     state: absent
@@ -7,7 +7,7 @@
     - /var/lib/mpd/music/RADIO
     - /var/www/images/radio-logos
 
-- name: Step 9 - copy dir contents
+- name: Step 8 - copy dir contents
   become: true
   shell: cp -r "{{ item.src }}" "{{ item.dest }}"
   with_items:
@@ -19,7 +19,7 @@
     - { src: '/home/pi/rel-stretch/var', dest: '/' }
     - { src: '/home/pi/rel-stretch/www', dest: '/var' }
 
-- name: Step 9 - copy dir contents in home
+- name: Step 8 - copy dir contents in home
   copy:
     src: "{{ item.src }}"
     dest: "{{ item.dest }}"
@@ -32,22 +32,22 @@
     - { src: '/home/pi/rel-stretch/home/srestart.sh', dest: '/home/pi/srestart.sh' }
     - { src: '/home/pi/rel-stretch/home/tlog.sh', dest: '/home/pi/tlog.sh' }
 
-- name: Step 9 - chmod dir
+- name: Step 8 - chmod dir
   become: true
   file: 
     path: /var/www/command
     mode: 0755
     recurse: yes
 
-- name: Step 9 - execute util.sh
+- name: Step 8 - execute util.sh
   become: true
   command: /var/www/command/util.sh "emerald" "2ecc71" "27ae60"
 
-- name: Step 9 - execute sqlite3
+- name: Step 8 - execute sqlite3
   become: true
   command: sqlite3 /var/local/www/db/moode-sqlite3.db "update cfg_system set value='Emerald' where param='themecolor'"
 
-- name: Step 9 - chmod 0755
+- name: Step 8 - chmod 0755
   become: true
   file: 
     path: "{{ item }}"
@@ -56,7 +56,7 @@
     - /etc/init.d/mpd
     - /usr/local/bin/a2dp-autoconnect
 
-- name: Step 9 - chmod 0666
+- name: Step 8 - chmod 0666
   become: true
   file: 
     path: "{{ item }}"
@@ -64,7 +64,7 @@
   with_items:
     - /etc/bluealsaaplay.conf
 
-- name: Step 9 - chmod 0644
+- name: Step 8 - chmod 0644
   become: true
   file: 
     path: "{{ item }}"
@@ -81,7 +81,7 @@
     - /lib/systemd/system/squeezelite-armv7l.service
     - /lib/systemd/system/upmpdcli.service
 
-- name: Step 9 - chmod 0777
+- name: Step 8 - chmod 0777
   become: true
   file: 
     path: "{{ item }}"
@@ -90,7 +90,7 @@
     - /var/local/www/playhistory.log
     - /var/local/www/currentsong.txt
 
-- name: Step 9 - disable services
+- name: Step 8 - disable services
   become: true
   systemd:
     name: "{{ item }}"
@@ -105,20 +105,20 @@
     - squeezelite-armv7l
     - upmpdcli.service
 
-- name: Step 9 - touch libcache.json
+- name: Step 8 - touch libcache.json
   become: true
   copy: 
     dest: /var/local/www/libcache.json
     content: ""
     mode: 0777
 
-- name: Step 9 - reboot
+- name: Step 8 - reboot
   become: true
   shell: sleep 2 && shutdown -r now
   async: 1
   poll: 0
 
-- name: Step 9 - wait for pi to return after reboot
+- name: Step 8 - wait for pi to return after reboot
   wait_for: >
     host={{ ansible_default_ipv4.address }}
     port=22

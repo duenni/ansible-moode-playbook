@@ -1,9 +1,9 @@
-- name: Step 7 - create mpd user
+- name: Step 6 - create mpd user
   become: true
   user:
     name: mpd
 
-- name: Step 7 - mkdirs
+- name: Step 6 - mkdirs
   become: true
   file: 
     path: "{{ item }}"
@@ -17,7 +17,7 @@
     - /var/lib/mpd/state
     - /var/log/mpd
 
-- name: Step 7 - touch mpd log file
+- name: Step 6 - touch mpd log file
   become: true
   copy: 
     dest: "{{ item }}"
@@ -28,7 +28,7 @@
   with_items:
     - /var/log/mpd/mpd.log
 
-- name: Step 7 - copy mpd.conf
+- name: Step 6 - copy mpd.conf
   become: true
   copy:
     owner: mpd
@@ -38,7 +38,7 @@
     dest: /etc/mpd.conf
     remote_src: yes
 
-- name: Step 7 - install MPD dev libs
+- name: Step 6 - install MPD dev libs
   become: true
   apt: name={{ item }} state=present
   with_items:
@@ -67,22 +67,23 @@
     - libicu-dev
     - libglib2.0-dev
 
-- name: Step 7 - download MPD 0.20.11 sources
+- name: Step 6 - download MPD 0.20.11 sources
   get_url:
     url: http://www.musicpd.org/download/mpd/0.20/mpd-0.20.11.tar.xz
     dest: /home/pi
 
-- name: Step 7 - untar MPD sources archive
+- name: Step 6 - untar MPD sources archive
   unarchive:
     src: /home/pi/mpd-0.20.11.tar.xz
     dest: /home/pi
+    creates: /home/pi/mpd-0.20.11
     remote_src: yes
 
-- name: Step 7 - run autogen.sh
+- name: Step 6 - run autogen.sh
   become: true
   shell: chdir=/home/pi/mpd-0.20.11 sh autogen.sh
 
-- name: Step 7 - MPD configure && make && make install
+- name: Step 6 - MPD configure && make && make install
   become: true
   command: "{{ item }}"
   args:
@@ -94,19 +95,19 @@
     - make install
     - strip --strip-unneeded /usr/local/bin/mpd
 
-- name: Step 7 - apt clean & autoremove
+- name: Step 6 - apt clean & autoremove
   become: true
   apt:
     autoclean: yes
     autoremove: yes
 
-- name: Step 7 - reboot
+- name: Step 6 - reboot
   become: true
   shell: sleep 2 && shutdown -r now
   async: 1
   poll: 0
 
-- name: Step 7 - wait for pi to return after reboot
+- name: Step 6 - wait for pi to return after reboot
   wait_for: >
     host={{ ansible_default_ipv4.address }}
     port=22

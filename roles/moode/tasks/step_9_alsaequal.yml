@@ -1,0 +1,21 @@
+- name: Step 9 - generate alsaequal bin file
+  become: true
+  shell: amixer -D alsaequal > /dev/null
+
+- name: Step 9 - chmod & chown alsaeuqal.bin
+  become: true
+  file:
+    path: /usr/local/bin/alsaequal.bin
+    owner: mpd
+    group: audio
+    mode: 0755
+
+- name: Step 9 - rm equal.conf
+  become: true
+  file:
+    path: /usr/share/alsa/alsa.conf.d/equal.conf
+    state: absent
+
+- name: Step 9 - mpc enable only 1
+  command: mpc enable only 1
+

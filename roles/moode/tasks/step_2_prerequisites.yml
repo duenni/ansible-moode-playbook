@@ -1,11 +1,11 @@
-- name: Step 3 - download moode sources
+- name: Step 2 - download moode sources
   get_url:
     url: http://moodeaudio.org/downloads/beta/rel-stretch-r40b9.zip
     dest: /home/pi
     checksum: md5:4d4d4dbceb6aeb74a51fe94a54c6c212
 
-- name: Step 3 - extract moode sources
+- name: Step 2 - extract moode sources
   unarchive:
-    src: /home/pi/rel-stretch.zip
+    src: /home/pi/rel-stretch-r40b9.zip
     dest: /home/pi
     remote_src: yes
