@@ -287,6 +287,14 @@
     - make install
 
 #gmusicapi
+#http://www.diyaudio.com/forums/pc-based/271811-moode-audio-player-raspberry-pi-1100.html#post5244981
+- name: gmusicapi - install packages
+  become: true
+  apt: name={{ item }} state=present
+  with_items:
+    - python-future
+    - python-lxml
+
 - name: gmusicapi - install with pip
   become: true
   pip:
