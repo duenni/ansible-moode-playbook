@@ -1,6 +1,6 @@
 ########################################################
 #
-# Build Recipe v1.7, 2017-11-14
+# Build Recipe v1.9, 2017-11-15
 #
 # These instructions are written for Linux Enthusiasts
 # and System Integrators and provide a recipe for making
@@ -15,6 +15,12 @@
 #
 # Changes:
 #
+# v1.9: Fixes for COMPONENT 6 number 4
+#       Remove -j arg from make (it causes segfault)
+#		Fix typo in ./configure: /etcmake -> /etc
+# v1.8: Add / to dev/null in STEP 9
+#       Remove bluealsa.servide disable in STEP 4
+#       Gmusicapi is optional install (COMPONENT 7)
 # v1.7: Fix step numbering
 #       Gmusicapi is optional install (COMPONENT 7)
 #       Squeezelite compile for native DSD support
@@ -247,7 +253,6 @@ sudo rm -rf /tmp/bluez-alsa
 
 sudo systemctl daemon-reload
 sudo systemctl disable bluetooth.service
-sudo systemctl disable bluealsa.service
 sudo systemctl disable hciuart.service
 
 4. Finish up
@@ -489,7 +494,7 @@ sudo reboot
 
 NOTE: The amixer command below will generate the alsaequal bin file.
 
-sudo amixer -D alsaequal > dev/null
+sudo amixer -D alsaequal > /dev/null
 
 sudo chmod 0755 /usr/local/bin/alsaequal.bin
 sudo chown mpd:audio /usr/local/bin/alsaequal.bin
@@ -736,8 +741,8 @@ sudo rm libupnpp-0.16.0.tar.gz
 sudo cp ./rel-stretch/other/upmpdcli/upmpdcli-1.2.15.tar.gz ./
 sudo tar xfz ./upmpdcli-1.2.15.tar.gz 
 cd upmpdcli-1.2.15
-./configure --prefix=/usr --sysconfdir=/etcmake
-sudo make -j $(nproc --all)
+./configure --prefix=/usr --sysconfdir=/etc
+sudo make
 sudo make install
 cd ~
 sudo rm -rf ./upmpdcli-1.2.15
