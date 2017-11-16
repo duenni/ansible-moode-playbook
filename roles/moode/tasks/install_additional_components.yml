@@ -191,7 +191,7 @@
     creates: /usr/lib/libupnp.so.6.3.4
   with_items:
     - ./configure --prefix=/usr --sysconfdir=/etc
-    - make
+    - make -j{{ ansible_processor_vcpus }}
     - make install
 
 - name: Upmpdcli - copy libupnp archive
@@ -216,7 +216,7 @@
     creates: /usr/lib/libupnpp.so.7.0.0
   with_items:
     - ./configure --prefix=/usr --sysconfdir=/etc
-    - make
+    - make -j{{ ansible_processor_vcpus }}
     - make install
 
 - name: Upmpdcli - copy upmpdcli archive
@@ -283,7 +283,7 @@
   with_items:
     - ./autogen.sh
     - ./configure
-    - make
+    - make -j{{ ansible_processor_vcpus }}
     - make install
 
 #gmusicapi
