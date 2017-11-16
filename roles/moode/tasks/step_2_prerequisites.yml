@@ -2,7 +2,7 @@
   get_url:
     url: http://moodeaudio.org/downloads/beta/rel-stretch-r40b9.zip
     dest: /home/pi
-    checksum: md5:34795addf00a8f4d0140aacecab12ea9
+    checksum: md5:4dd1ace90cf34f146615a0e292d597ba
 
 - name: Step 2 - extract moode sources
   unarchive:
