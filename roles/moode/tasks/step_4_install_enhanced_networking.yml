@@ -78,7 +78,6 @@
     daemon_reload: yes
   with_items:
     - 'bluetooth.service'
-    #- 'bluealsa.service'
     - 'hciuart.service'
 
 - name: Step 4 - mkdir var/run/bluealsa
