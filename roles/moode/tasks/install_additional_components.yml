@@ -28,6 +28,7 @@
   git:
     repo:  git://github.com/Joshkunz/ashuffle.git
     dest: /home/pi/ashuffle
+    version: aab5d80a505317708f2efb19857665bb818f602a #Mar 21, 2017
 
 - name: Autoshuffle - make
   become: true
@@ -48,6 +49,7 @@
   git:
     repo:  git://github.com/hrkfdn/mpdas
     dest: /home/pi/mpdas
+    version: 0.4.4
 
 - name: MPD Audio Scrobbler - make
   become: true
@@ -91,6 +93,7 @@
   git:
     repo:  git://github.com/mikebrady/shairport-sync.git
     dest: /home/pi/shairport-sync
+    version: 3.1.4
 
 - name: Shairport-sync - autoreconf - configure - make - make install
   become: true
@@ -127,6 +130,7 @@
     repo: https://github.com/ralph-irving/squeezelite
     dest: /tmp/squeezelite
     force: yes
+    version: e92c09c63098b46ce0e03b69fdad4ffd10fc59ec #Nov 16, 2017
 
 - name: Squeezelite - make for armv6l
   become: true
@@ -290,6 +294,7 @@
   git:
     repo: https://@opensourceprojects.eu/git/p/libupnppsamples/code
     dest: /home/pi/libupnppsamples-code
+    version: 8a60603a77b72b1a1901b23e45c3924374fa28db #2017-09-19
 
 - name: upexplorer - autogen.sh - configure - make - make install
   become: true

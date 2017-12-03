@@ -41,6 +41,7 @@
   git:
     repo: git://github.com/Arkq/bluez-alsa.git
     dest: /tmp/bluez-alsa
+    version: 99d9d72a5aed22dd755485a2661e209ded697079 #Nov 15, 2017
 
 - name: Step 4 - autoreconf bluez-alsa
   become: true
