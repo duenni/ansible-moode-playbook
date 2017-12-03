@@ -354,14 +354,12 @@
   become: true
   git:
     repo: https://github.com/allocom/piano-firmware.git
-    dest: /home/pi
+    dest: /home/pi/piano-firmware
+    version: 8a2d7ff1c6a8001602939b88ea1b60f70fa7538c #Mar 27, 2017
 
-- name: copy package
+- name: copy files
   become: true
-  copy:
-    src: /home/pi/piano-firmware/lib/firmware/allo
-    dest: /lib/firmware
-    remote_src: yes
+  shell: cp -r /home/pi/piano-firmware/lib/firmware/allo /lib/firmware
 
 #########################################################
 # Final clean up

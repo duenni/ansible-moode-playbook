@@ -25,13 +25,13 @@
     dest: "{{ item.dest }}"
     remote_src: yes
   with_items:
-    - { src: '/home/pi/rel-stretch/home/.dircolors', dest: '/home/pi/.dircolors' }
+    - { src: '/home/pi/rel-stretch/home/dircolors', dest: '/home/pi/.dircolors' }
     - { src: '/home/pi/rel-stretch/home/fpmpool.sh', dest: '/home/pi/.fpmpool.sh' }
     - { src: '/home/pi/rel-stretch/home/mlog.sh', dest: '/home/pi/mlog.sh' }
     - { src: '/home/pi/rel-stretch/home/piano.sh', dest: '/home/pi/piano.sh' }
     - { src: '/home/pi/rel-stretch/home/srestart.sh', dest: '/home/pi/srestart.sh' }
     - { src: '/home/pi/rel-stretch/home/tlog.sh', dest: '/home/pi/tlog.sh' }
-    - { src: '/home/pi/xinitrc.default', dest: '/home/pi/.xinitrc' }
+    - { src: '/home/pi/rel-stretch/home/xinitrc.default', dest: '/home/pi/.xinitrc' }
 
 - name: Step 8 - chmod dir
   become: true
