@@ -1,6 +1,6 @@
-########################################################
+################################################################
 #
-# Build Recipe v1.9, 2017-11-15
+# Build Recipe v2.1, 2017-12-01
 #
 # These instructions are written for Linux Enthusiasts
 # and System Integrators and provide a recipe for making
@@ -11,16 +11,23 @@
 # Unless otherwise noted or if a command requires user
 # interaction, groups of commands can be run in batch.
 #
-# moOde 4.0 Beta 9
+# moOde 4.0 Beta 11
 #
 # Changes:
 #
+# v2.1: Chg poweroff to reboot in STEP 2
+#       Should be /var/log/mpd/log in STEP 6
+# v2.0: Add COMPONENT 8 Local UI display
+#       Add COMPONENT 9 Allo Piano 2.1 firmware
+#       Update STEP 8 with xinitrc
+#       Add avahi-utils to STEP 3 core packages
+#       Remove -j $(nproc --all) for compiles
+#       Add 0644 to /etc/upmpdcli.conf in COMPONENT 6 number 4
 # v1.9: Fixes for COMPONENT 6 number 4
 #       Remove -j arg from make (it causes segfault)
-#		Fix typo in ./configure: /etcmake -> /etc
+#       Fix typo in ./configure: /etcmake -> /etc
 # v1.8: Add / to dev/null in STEP 9
 #       Remove bluealsa.servide disable in STEP 4
-#       Gmusicapi is optional install (COMPONENT 7)
 # v1.7: Fix step numbering
 #       Gmusicapi is optional install (COMPONENT 7)
 #       Squeezelite compile for native DSD support
@@ -42,20 +49,20 @@
 #
 # (C) Tim Curtis 2017 http://moodeaudio.org
 #
-########################################################
+################################################################
 
-////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////
 //
-// STEP 1 - Enable SSH and remove Auto-Resize task
+// STEP 1 - Modify Raspbian Lite and create a new, base image
 //
 // Use one of the two options below depending on what
 // type of host computer you are going to be using.
 //
-////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////
 
-////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////
 // OPTION 1: Using Raspbian Linux (Raspberry Pi)
-////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////
 
 1. Download Raspbian Stretch Lite 2017-09-07
 wget http://downloads.raspberrypi.org/raspbian_lite/images/raspbian_lite-2017-09-08/2017-09-07-raspbian-stretch-lite.zip
@@ -104,11 +111,13 @@ sudo rmdir /mnt/p2
 
 7. Install the modified 2017-09-07-raspbian-stretch-lite.img to an SD Card 
 
-8. sudo poweroff
+8. Power off
+# SR1
+sudo poweroff
 
-////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////
 // OPTION 2: Using Windows or Mac computer
-////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////
 
 1. Download Raspbian Stretch Lite 2017-09-07
 http://downloads.raspberrypi.org/raspbian_lite/images/raspbian_lite-2017-09-08/2017-09-07-raspbian-stretch-lite.zip
@@ -145,11 +154,11 @@ net.ifnames=0
 
 9. Eject the SD Card
 
-////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////
 //
 // STEP 2 - Expand the root partition to 3GB
 //
-////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////
 
 1. Insert the SD Card into a Raspberry Pi and POWER UP.
 
@@ -166,12 +175,12 @@ sudo sed -i "s/raspberrypi/moode/" /etc/hosts
 //
 // NOTE: We are downloading the Sources in this particular step in order to obtain the resizefs.sh file.
 //
-// moOde 4.0 BETA 9
+// moOde 4.0 BETA 11
 //
 
 cd ~
-wget http://moodeaudio.org/downloads/beta/rel-stretch-r40b9.zip
-sudo unzip ./rel-stretch-r40b9.zip
+wget http://moodeaudio.org/downloads/beta/rel-stretch-r40b11.zip
+sudo unzip ./rel-stretch-r40b11.zip
 
 4. Expand the root partition to 3GB.
 
@@ -182,13 +191,14 @@ sudo ./resizefs.sh start
 sudo rm ./resizefs.sh
 sudo cp ./rel-stretch/boot/config.txt.default /boot/config.txt
 
-sudo poweroff
+# SR1
+sudo reboot
 
-////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////
 //
 // STEP 3 - Install core packages
 //
-////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////
 
 1. First lets make some basic optimizations
 
@@ -207,19 +217,20 @@ sudo apt-get -y purge triggerhappy
 sudo apt-get update
 sudo apt-get -y upgrade
 
+# SR2
 sudo reboot
 
 sudo apt-get -y install rpi-update php-fpm nginx sqlite3 php-sqlite3 memcached php-memcache mpc \
 bs2b-ladspa libbs2b0 libasound2-plugin-equal telnet automake sysstat squashfs-tools tcpdump shellinabox \
-samba smbclient udisks-glue ntfs-3g exfat-fuse git inotify-tools libav-tools
+samba smbclient udisks-glue ntfs-3g exfat-fuse git inotify-tools libav-tools avahi-utils
 
 sudo systemctl disable shellinabox
 
-////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////
 //
 // STEP 4 - Install enhanced networking
 //
-////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////
 
 1. Install Host AP mode 
 
@@ -261,13 +272,14 @@ sudo mkdir -p /var/run/bluealsa
 sudo sync
 sudo apt-get clean
 
+# SR3
 sudo reboot
 
-////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////
 //
 // STEP 5 - Install Rotary encoder driver
 //
-////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////
 
 1. WiringPi
 
@@ -288,11 +300,11 @@ sudo gcc -std=c99 rotenc.c -orotenc -lwiringPi
 sudo cp ./rotenc /usr/local/bin
 sudo rm ./rotenc*
 
-////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////
 //
 // STEP 6 - Compile and install MPD
 //
-////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////
 
 1. Create MPD runtime environment.
 
@@ -303,8 +315,8 @@ sudo mkdir /var/lib/mpd/playlists
 sudo touch /var/lib/mpd/state
 sudo chown -R mpd:audio /var/lib/mpd
 sudo mkdir /var/log/mpd
-sudo touch /var/log/mpd/mpd.log
-sudo chmod 644 /var/log/mpd/mpd.log
+sudo touch /var/log/mpd/log
+sudo chmod 644 /var/log/mpd/log
 sudo chown -R mpd:audio /var/log/mpd
 sudo cp ./rel-stretch/mpd/mpd.conf.default /etc/mpd.conf
 sudo chown mpd:audio /etc/mpd.conf
@@ -353,7 +365,7 @@ sudo ./configure --enable-database --enable-libmpdclient --enable-alsa \
 
 5. Compile and install.
 
-sudo make -j $(nproc --all)
+sudo make
 sudo make install
 sudo strip --strip-unneeded /usr/local/bin/mpd
 cd ~
@@ -362,13 +374,14 @@ sudo rm -rf ./mpd-0.20.11*
 sudo apt-get clean
 sudo apt-get autoremove
 
+# SR4
 sudo reboot
 
-////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////
 //
 // STEP 7 - Create moOde runtime environment
 //
-////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////
 
 1. Privilages
 
@@ -419,11 +432,11 @@ sudo chmod -R 0777 /var/local/www/db
 sudo rm -r /var/www/html
 sudo rm /etc/update-motd.d/10-uname
 
-////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////
 //
 // STEP 8 - Install moOde sources and configs
 //
-////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////
 
 1. Application sources and configs
 
@@ -436,6 +449,7 @@ sudo cp ./rel-stretch/mpd/playlists/* /var/lib/mpd/playlists
 sudo cp -r ./rel-stretch/etc/* /etc
 sudo cp -r ./rel-stretch/home/* /home/pi
 sudo cp -r ./rel-stretch/home/.dircolors /home/pi
+sudo mv /home/pi/xinitrc.default /home/pi/.xinitrc
 sudo cp -r ./rel-stretch/lib/* /lib
 sudo cp -r ./rel-stretch/usr/* /usr
 sudo cp -r ./rel-stretch/var/* /var
@@ -484,13 +498,14 @@ sudo chmod 0777 /var/local/www/currentsong.txt
 sudo touch /var/local/www/libcache.json
 sudo chmod 0777 /var/local/www/libcache.json
 
+# SR5
 sudo reboot
 
-////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////
 //
 // STEP 9 - Alsaequal
 //
-////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////
 
 NOTE: The amixer command below will generate the alsaequal bin file.
 
@@ -502,16 +517,16 @@ sudo rm /usr/share/alsa/alsa.conf.d/equal.conf
 
 mpc enable only 1
 
-////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////
 //
-// STEP 10 - Squash /var/www for performance/reliability
+// STEP 10 - Optionally squash /var/www
 //
-////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////
 
-NOTE: This is optional but highly recommended.
+NOTE: This is optional but highly recommended for performance/reliability
 
 sudo -i
-echo "/var/local/moode.sqsh   /var/www        squashfs        ro,defaults     0       0" >>/etc/fstab
+echo "/var/local/moode.sqsh   /var/www        squashfs        ro,defaults     0       0" >> /etc/fstab
 logout
 
 cd ~
@@ -521,25 +536,28 @@ sudo mksquashfs /var/www /var/local/moode.sqsh
 sudo rm -rf /var/www/*
 sync
 
+# SR6
 sudo reboot
 
-////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////
 //
-// STEP 11 - Optionally, install latest Linux Kernel
+// STEP 11 - Optionally install latest Linux Kernel
 //
-////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////
 
 sudo PRUNE_MODULES=1 rpi-update
 
+sudo rm -rf /lib/modules.bak
+sudo rm -rf /boot.bak
+
+# SR7
 sudo reboot
 
-sudo rm -rf /lib/modules.bak
-
-////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////
 //
 // STEP 12 - Launch and configure moOde!
 //
-////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////
 
 1. Initial configuration
 
@@ -561,11 +579,11 @@ c) Click to begin play
 d) Menu, Audio info
 e) Verify Output stream is 16 bit 48 kHz
 
-////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////
 //
 // STEP 13 - Final prep for image
 //
-////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////
 
 1. Optionally check the boot partition.
 
@@ -595,34 +613,35 @@ sudo cp ./rel-stretch/network/hostapd.conf.default /etc/hostapd/hostapd.conf
 
 5. Shut down
 
+# SR8
 sudo poweroff
 
 NOTE: Resetting the network config allows the moodecfg.txt automation file to be used to automatically change the
 host name and other names at first boot. See the file /var/www/setup.txt for more information on this feature.
 
-########################################################
+################################################################
 #
 #
 # Install additional components
 #
 #
-########################################################
+################################################################
 
-////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////
 //
 // COMPONENT 1 - MiniDLNA
 //
-////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////
 
 sudo apt-get -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" install minidlna
 sudo systemctl disable minidlna
 sudo apt-get -y install djmount
 
-////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////
 //
 // COMPONENT 2 - Autoshuffle
 //
-////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////
 
 cd ~
 sudo git clone https://github.com/Joshkunz/ashuffle.git
@@ -632,11 +651,11 @@ cd ~
 sudo cp ./ashuffle/ashuffle /usr/local/bin
 sudo rm -rf ./ashuffle
 
-////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////
 //
 // COMPONENT 3 - MPD Audio Scrobbler
 //
-////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////
 
 cd ~
 sudo git clone https://github.com/hrkfdn/mpdas
@@ -648,11 +667,11 @@ sudo rm -rf ./mpdas
 sudo cp ./rel-stretch/usr/local/etc/mpdasrc.default /usr/local/etc/mpdasrc
 sudo chmod 0755 /usr/local/etc/mpdasrc
 
-////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////
 //
 // COMPONENT 4 - Shairport-sync
 //
-////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////
 
 sudo apt-get -y install autoconf libtool libdaemon-dev libasound2-dev libpopt-dev libconfig-dev \
 avahi-daemon libavahi-client-dev libssl-dev libsoxr-dev
@@ -669,11 +688,11 @@ cd ~
 sudo rm -rf ./shairport-sync
 sudo cp ./rel-stretch/usr/local/etc/shairport-sync.conf /usr/local/etc
 
-////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////
 //
 // COMPONENT 5 - Squeezelite
 //
-////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////
 
 BASE=/tmp/squeezelite
 git clone https://github.com/ralph-irving/squeezelite $BASE
@@ -698,11 +717,11 @@ sudo cp ./squeezelite /usr/local/bin/squeezelite-armv7l
 popd
 rm -rf $BASE
 
-////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////
 //
 // COMPONENT 6 - Upmpdcli
 //
-////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////
 
 // Enjoy a Coffee and listen to some Tunes while the compiles run :-)
 
@@ -718,7 +737,7 @@ sudo cp ./rel-stretch/other/upmpdcli/libupnp-1.6.20.jfd5.tar.gz ./
 sudo tar xfz ./libupnp-1.6.20.jfd5.tar.gz
 cd libupnp-1.6.20.jfd5
 ./configure --prefix=/usr --sysconfdir=/etc
-sudo make -j $(nproc --all)
+sudo make
 sudo make install
 cd ~
 sudo rm -rf ./libupnp-1.6.20.jfd5
@@ -730,7 +749,7 @@ sudo cp ./rel-stretch/other/upmpdcli/libupnpp-0.16.0.tar.gz ./
 sudo tar xfz ./libupnpp-0.16.0.tar.gz
 cd libupnpp-0.16.0
 ./configure --prefix=/usr --sysconfdir=/etc
-sudo make -j $(nproc --all)
+sudo make
 sudo make install
 cd ~
 sudo rm -rf ./libupnpp-0.16.0
@@ -751,6 +770,7 @@ sudo rm upmpdcli-1.2.15.tar.gz
 sudo useradd upmpdcli
 sudo cp ./rel-stretch/lib/systemd/system/upmpdcli.service /lib/systemd/system
 sudo cp ./rel-stretch/etc/upmpdcli.conf /etc
+sudo chmod 0644 /etc/upmpdcli.conf
 sudo systemctl daemon-reload
 sudo systemctl disable upmpdcli
 
@@ -762,46 +782,87 @@ sudo git clone https://@opensourceprojects.eu/git/p/libupnppsamples/code libupnp
 cd libupnppsamples-code
 sudo ./autogen.sh
 sudo ./configure
-sudo make -j $(nproc --all)
+sudo make
 sudo make install
 cd ~
 sudo rm -rf ./libupnppsamples-code
 
-////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////
 //
 // COMPONENT 7 - Optionally install gmusicapi
 //
-////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////
 
 NOTE: This component enables access to Google Play Music service via UPnP renderer.
       If its not installed, the Google Play section in UPnP config screen will not be present.
 
 sudo pip install gmusicapi
 
-////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////
+//
+// COMPONENT 8 - Local UI display 
+//
+////////////////////////////////////////////////////////////////
+
+1. Install xserver. Perform this step separately from the rest.
+
+sudo apt-get -y install xinit xorg lsb-release xserver-xorg-legacy chromium-browser libgtk-3-0
+
+2. Permissions, clean up and service config
+
+sudo sed -i "s/allowed_users=console/allowed_users=anybody/" /etc/X11/Xwrapper.config
+sudo apt-get clean
+sudo systemctl daemon-reload
+sudo systemctl disable localui
+
+4. Configure Chrome Browser
+
+NOTE: These steps are performed AFTER actually starting local display via System config,
+rebooting and then accessing moOde on the local display.
+
+a. Connect a keyboard.
+b. Press Ctrl-t to open a separate instance of Chrome Browser.
+c. For Raspberry Pi 7" Touch Display open Chrome settings and set the zoom to 75%.
+d. Optionally, enter url chome://extensions and install the xontab virtual keyboard extension.
+e. Enter url chrome://flags and scroll down to Overlay Scrollbars and enable the setting.
+
+////////////////////////////////////////////////////////////////
+//
+// COMPONENT 9 - Allo Piano 2.1 Firmware
+//
+////////////////////////////////////////////////////////////////
+
+cd ~
+wget https://github.com/allocom/piano-firmware/archive/master.zip
+sudo unzip master.zip 
+sudo rm ./master.zip
+sudo cp -r ./piano-firmware-master/lib/firmware/allo /lib/firmware
+sudo rm -rf ./piano-firmware-master
+
+////////////////////////////////////////////////////////////////
 //
 // FINAL - Clean up
 //
-////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////
 
 cd ~
 sudo apt-get clean
 sudo /var/www/command/util.sh clear-syslogs
 sudo reboot
 
-########################################################
+################################################################
 #
 #
 # Appendix
 #
 #
-########################################################
+################################################################
 
-////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////
 //
 // Squashfs procedures
 //
-////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////
 
 1. SQUASH /var/www
 
@@ -834,11 +895,11 @@ sudo rm /var/local/moode.sqsh
 
 sudo reboot
 
-////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////
 //
 // SD Card procedures (Mac OSX)
 //
-////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////
 
 
 1. Write SD Card to image file with truncation to the root partition end blk.
@@ -857,11 +918,11 @@ diskutil unmountDisk /dev/disk3
 sudo dd if=/Users/Lt1user/Documents/moode.img of=/dev/rdisk3 bs=1m
 diskutil eject /dev/disk3
 
-////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////
 //
 // SD Card procedures (Windows)
 //
-////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////
 
 NOTE: The latest version of Win32diskImager v1.0 now has a setting where you can
 select to read only allocated partitions. It is a free download from Sourceforge.
@@ -872,8 +933,8 @@ https://sourceforge.net/projects/win32diskimager/
 Assuming STEP 2 was performed to resize the root partition to 3GB, the resulting
 moode.img file will only be 3GB in size. This will compress down to about 1GB.
 
-########################################################
+################################################################
 #
 # END
 #
-########################################################
+################################################################

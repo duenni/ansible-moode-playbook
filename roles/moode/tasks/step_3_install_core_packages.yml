@@ -56,6 +56,7 @@
     - git
     - inotify-tools
     - libav-tools
+    - avahi-utils
 
 - name: Step 3 - disable shellinabox
   become: true

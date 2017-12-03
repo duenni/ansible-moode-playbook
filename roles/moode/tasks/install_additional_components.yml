@@ -1,5 +1,7 @@
 
-#MiniDLNA
+#########################################################
+# COMPONENT 1 - MiniDLNA
+#########################################################
 - name: MiniDLNA - apt-get
   become: true
   apt:
@@ -18,7 +20,9 @@
   become: true
   apt: name=djmount state=present
 
-#Ashuffle
+#########################################################
+# COMPONENT 2 - Ashuffle
+#########################################################
 - name: Autoshuffle - git checkout autoshuffle
   become: true
   git:
@@ -36,7 +40,9 @@
     dest: /usr/local/bin/ashuffle
     remote_src: yes
 
-#MPD Audio Scrobbler
+#########################################################
+# COMPONENT 3 - MPD Audio Scrobbler
+#########################################################
 - name: MPD Audio Scrobbler - git checkout MPD Audio Scrobbler
   become: true
   git:
@@ -62,7 +68,9 @@
     mode: 0755
     remote_src: yes
 
-#Shairport-sync
+#########################################################
+# COMPONENT 4 - Shairport-sync
+#########################################################
 - name: Shairport-sync - install packages
   become: true
   apt: name={{ item }} state=present
@@ -110,7 +118,9 @@
     dest: /usr/local/etc/shairport-sync.conf
     remote_src: yes
 
-#Squeezelite
+#########################################################
+# COMPONENT 5 - Squeezelite
+#########################################################
 - name: Squeezelite - git checkout squeezelite
   become: true
   git:
@@ -156,7 +166,9 @@
     remote_src: yes
   when: "ansible_architecture == 'armv7l'"
 
-#Upmpdcli
+#########################################################
+# COMPONENT 6 - Upmpdcli
+#########################################################
 - name: Upmpdcli - install packages
   become: true
   apt: name={{ item }} state=present
@@ -191,7 +203,7 @@
     creates: /usr/lib/libupnp.so.6.3.4
   with_items:
     - ./configure --prefix=/usr --sysconfdir=/etc
-    - make -j{{ ansible_processor_vcpus }}
+    - make
     - make install
 
 - name: Upmpdcli - copy libupnp archive
@@ -216,7 +228,7 @@
     creates: /usr/lib/libupnpp.so.7.0.0
   with_items:
     - ./configure --prefix=/usr --sysconfdir=/etc
-    - make -j{{ ansible_processor_vcpus }}
+    - make
     - make install
 
 - name: Upmpdcli - copy upmpdcli archive
@@ -249,15 +261,20 @@
   user:
     name: upmpdcli
 
-- name: Upmpdcli- upmpdcli copy contents
+- name: Upmpdcli- copy upmpdcli.service
   become: true
   copy:
-    src: "{{ item.src }}"
-    dest: "{{ item.dest }}"
+    src: /home/pi/rel-stretch/lib/systemd/system/upmpdcli.service
+    dest: /lib/systemd/system/upmpdcli.service
     remote_src: yes
-  with_items:
-    - { src: '/home/pi/rel-stretch/lib/systemd/system/upmpdcli.service', dest: '/lib/systemd/system/upmpdcli.service' }
-    - { src: '/home/pi/rel-stretch/etc/upmpdcli.conf', dest: '/etc/upmpdcli.conf' }
+
+- name: Upmpdcli- copy upmpdcli.conf
+  become: true
+  copy:
+    src: /home/pi/rel-stretch/etc/upmpdcli.conf
+    dest: /etc/upmpdcli.conf
+    mode: 0644
+    remote_src: yes
 
 - name: Upmpdcli - disable service
   become: true
@@ -283,10 +300,12 @@
   with_items:
     - ./autogen.sh
     - ./configure
-    - make -j{{ ansible_processor_vcpus }}
+    - make
     - make install
 
-#gmusicapi
+#########################################################
+# COMPONENT 7 - gmusicapi
+#########################################################
 #http://www.diyaudio.com/forums/pc-based/271811-moode-audio-player-raspberry-pi-1100.html#post5244981
 - name: gmusicapi - install packages
   become: true
@@ -300,7 +319,53 @@
   pip:
     name: gmusicapi
 
-#Final clean up
+#########################################################
+# COMPONENT 8 - Local UI display
+#########################################################
+- name: local UI display - install packages
+  become: true
+  apt: name={{ item }} state=present
+  with_items:
+    - xinit
+    - xorg
+    - lsb-release
+    - xserver-xorg-legacy
+    - chromium-browser
+    - libgtk-3-0
+
+- name: permissions
+  become: true
+  shell: "sed -i \"s/allowed_users=console/allowed_users=anybody/\" /etc/X11/Xwrapper.config"
+
+- name: systemd disable service
+  become: true
+  systemd:
+    daemon_reload: yes
+    name: localui
+    state: stopped
+    enabled: no
+
+# See build_recipe for further instructions how to use local UI
+
+#########################################################
+# COMPONENT 9 - Allo Piano 2.1 Firmware
+#########################################################
+- name: git checkout Piano firmware
+  become: true
+  git:
+    repo: https://github.com/allocom/piano-firmware.git
+    dest: /home/pi
+
+- name: copy package
+  become: true
+  copy:
+    src: /home/pi/piano-firmware/lib/firmware/allo
+    dest: /lib/firmware
+    remote_src: yes
+
+#########################################################
+# Final clean up
+#########################################################
 - name: delete build dirs and files
   become: true
   file: 
@@ -315,6 +380,7 @@
     - /home/pi/upmpdcli-1.2.15
     - /home/pi/libupnppsamples-code
     - /tmp/squeezelite
+    - /home/pi/piano-firmware
 
 - name: apt clean
   become: true

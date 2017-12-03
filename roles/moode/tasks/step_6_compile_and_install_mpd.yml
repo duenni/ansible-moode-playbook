@@ -26,7 +26,7 @@
     group: audio
     mode: 0644
   with_items:
-    - /var/log/mpd/mpd.log
+    - /var/log/mpd/log
 
 - name: Step 6 - copy mpd.conf
   become: true
@@ -91,7 +91,7 @@
     creates: /usr/local/bin/mpd
   with_items:
     - ./configure --enable-database --enable-libmpdclient --enable-alsa --enable-curl --enable-dsd --enable-ffmpeg --enable-flac --enable-id3 --enable-soundcloud --enable-lame-encoder --enable-mad --enable-mpg123 --enable-pipe-output --enable-recorder-output --enable-shout --enable-vorbis --enable-wave-encoder --enable-wavpack --enable-httpd-output --enable-soxr --with-zeroconf=avahi --disable-bzip2 --disable-zzip --disable-fluidsynth --disable-gme --disable-wildmidi --disable-sqlite --disable-jack --disable-ao --disable-oss --disable-ipv6 --disable-pulse --disable-nfs --disable-smbclient --disable-upnp --disable-expat --disable-lsr --disable-sndfile --disable-audiofile --disable-sidplay
-    - make -j{{ ansible_processor_vcpus }}
+    - make
     - make install
     - strip --strip-unneeded /usr/local/bin/mpd
 
